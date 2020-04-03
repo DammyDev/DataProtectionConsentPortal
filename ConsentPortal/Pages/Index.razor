@@ -4,9 +4,11 @@
 @using Newtonsoft.Json
 @using Blazor.FileReader
 @using System.IO
+@using Microsoft.Extensions.Configuration;
 
 @inject ConsentService service
-@inject IFileReaderService fileReaderService;
+@inject IFileReaderService fileReaderService
+@inject IConfiguration _config
 
 @if (showDivOne == true)
 {
@@ -17,16 +19,16 @@
                 Please enter customer's account number here:
                 <input type="text" class="form-control-sm" @bind="payLoad.AccountNumber" required />
 
-                <button class="btn-sm btn-outline-primary"type="submit">Check </button>
+                <button class="btn-sm btn-outline-primary" type="submit">Check </button>
 
                 @if (showError == true)
                 {
                     <span id="error" style="color:red; font-stretch:narrower"> <em>@errorMsg</em></span>
                 }
             </div>
-        </EditForm> 
+        </EditForm>
 
-</div>
+    </div>
 }
 
 @if (showDivTwo == true)
@@ -49,7 +51,7 @@
 @if (showGreen == true)
 {
     <div class="alert alert-success alert-dismissible" role="alert">
-        <h5 class="card-header">@fResponse.Name | @fResponse.CIF | @payLoad.AccountNumber</h5>
+        <h5 class="card-header">@fResponse.acctName | @fResponse.cif_id | @payLoad.AccountNumber</h5>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close">
             <span aria-hidden="true">&times;</span>
         </button>
@@ -64,7 +66,7 @@
 else if (showRed == true)
 {
     <div class="alert alert-danger alert-dismissible" role="alert">
-        <h5 class="card-header">@fResponse.Name | @fResponse.CIF | @payLoad.AccountNumber</h5>
+        <h5 class="card-header">@fResponse.acctName | @fResponse.cif_id | @payLoad.AccountNumber</h5>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close">
             <span aria-hidden="true">&times;</span>
         </button>
@@ -91,7 +93,7 @@ else if (showRed == true)
                         {
                             <span id="error" style="color:red; font-stretch:narrower; padding-right:5px"> <em>@errorMsg</em></span>
                         }
-                        <input type="file" @ref=inputTypeFileElement required/>
+                        <input type="file" @ref=inputTypeFileElement required />
                         <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
 
                     </div>
@@ -124,13 +126,13 @@ else if (showRed == true)
     async void Check()
     {
         errorMsg = "";
-        showError =  false;
+        showError = false;
         uploadModel.IsSignatureVerified = false;
         uploadModel.IsConsentReceived = false;
 
         if (payLoad.AccountNumber != null)
         {
-            responseMsg = await Http.GetAsync($"http://my-json-server.typicode.com/dammydev/fiservice/accounts/{payLoad.AccountNumber.ToString()}");
+            responseMsg = await Http.GetAsync($"{_config.GetValue<string>("Settings:BaseUrl")}?acctnum={payLoad.AccountNumber}&appID={_config.GetValue<string>("Settings:AppId")}");
         }
 
         if (responseMsg.StatusCode == System.Net.HttpStatusCode.OK)
@@ -143,7 +145,7 @@ else if (showRed == true)
 
             if (fResponse != null)
             {
-                consent = await service.GetCif(fResponse.CIF);
+                consent = await service.GetCif(fResponse.cif_id);
 
                 if (consent == null)
                 {
