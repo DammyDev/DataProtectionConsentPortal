@@ -45,6 +45,7 @@ app {
         .main .top-row a:last-child {
             overflow: hidden;
             text-overflow: ellipsis;
+            color:honeydew;
             /*margin-left: auto;*/
         }
 

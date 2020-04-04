@@ -1,19 +1,24 @@
 ﻿@page "/"
 
+@using Serilog;
 @using ConsentPortal.Data
 @using Newtonsoft.Json
 @using Blazor.FileReader
 @using System.IO
-@using Microsoft.Extensions.Configuration;
+@using Microsoft.Extensions.Configuration
+@using System.Security.Claims
 
 @inject ConsentService service
 @inject IFileReaderService fileReaderService
 @inject IConfiguration _config
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@*@attribute [Authorize(Roles = "Admin, SalesManager")]*@
+@attribute [Authorize]
 
 @if (showDivOne == true)
 {
     <div id="DivOne">
-        <h3>Hello, user!</h3>
+        <br />
         <EditForm Model="@payLoad" OnValidSubmit="@Check">
             <div style="margin-bottom:15px">
                 Please enter customer's account number here:
@@ -27,7 +32,6 @@
                 }
             </div>
         </EditForm>
-
     </div>
 }
 
@@ -103,6 +107,7 @@ else if (showRed == true)
     </div>
 }
 
+
 @code {
 
     ElementReference inputTypeFileElement;
@@ -121,6 +126,15 @@ else if (showRed == true)
     bool showError = true;
     bool showProgress => !showError;
     string errorMsg;
+    AuthenticationState authState;
+    ClaimsPrincipal user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        Log.Information($"{user.Identity.Name} logged in");
+    }
 
 
     async void Check()
@@ -130,59 +144,88 @@ else if (showRed == true)
         uploadModel.IsSignatureVerified = false;
         uploadModel.IsConsentReceived = false;
 
-        if (payLoad.AccountNumber != null)
+        try
         {
-            responseMsg = await Http.GetAsync($"{_config.GetValue<string>("Settings:BaseUrl")}?acctnum={payLoad.AccountNumber}&appID={_config.GetValue<string>("Settings:AppId")}");
-        }
-
-        if (responseMsg.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            showDivOne = showRed = showGreen = false;
-            showDivTwo = showError = true;
-
-            var responseContent = await responseMsg.Content.ReadAsStringAsync();
-            fResponse = JsonConvert.DeserializeObject<FinacleResponse>(responseContent);
-
-            if (fResponse != null)
+            if (payLoad.AccountNumber != null)
             {
-                consent = await service.GetCif(fResponse.cif_id);
+                var requestUri = $"{_config.GetValue<string>("Settings:BaseUrl")}?acctnum={payLoad.AccountNumber}&appID={_config.GetValue<string>("Settings:AppId")}";
 
-                if (consent == null)
+                responseMsg = await Http.GetAsync(requestUri);
+                Log.Information($"{user.Identity.Name} |FI_Service called {requestUri}");
+            }
+
+            if (responseMsg.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+
+                showDivOne = showRed = showGreen = false;
+                showDivTwo = showError = true;
+
+                var responseContent = await responseMsg.Content.ReadAsStringAsync();
+                fResponse = JsonConvert.DeserializeObject<FinacleResponse>(responseContent);
+
+                if (fResponse != null)
                 {
-                    showRed = true;
+                    Log.Information($"{DateTime.Now} | FI_Service Response:{responseMsg.StatusCode.ToString()} Content: {payLoad.AccountNumber} {fResponse.cif_id} '{fResponse.acctName}'");
+                    consent = await service.GetCif(fResponse.cif_id);
+
+                    if (consent == null)
+                    {
+                        showRed = true;
+                        Log.Information($"{DateTime.Now} | Database Response: {fResponse.cif_id} not found. ");
+
+                    }
+                    else
+                    {
+                        showGreen = true;
+                        Log.Information($"{DateTime.Now} | Database Response: {fResponse.cif_id} found.  ");
+                    }
                 }
                 else
                 {
-                    showGreen = true;
+
                 }
+
+            }
+            else if (responseMsg.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                showError = true;
+                errorMsg = "Not Found on Finacle! Please retry with a valid Account Number.";
+                Log.Information($"{user.Identity.Name} | {payLoad.AccountNumber} {errorMsg}");
             }
             else
             {
-
+                showError = true;
+                errorMsg = $"Something went wrong! Error: {responseMsg.StatusCode}";
+                Log.Error($"{user.Identity.Name} | {errorMsg}");
             }
+            this.StateHasChanged();
 
         }
-        else if (responseMsg.StatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (Exception ex)
         {
-            showError = true;
-            errorMsg = "Not Found on Finacle! Please retry with a valid Account Number.";
+            Log.Error($"{user.Identity.Name} | {ex.Message}");
         }
-        else
-        {
-            showError = true;
-            errorMsg = $"Something went wrong! Error: {responseMsg.StatusCode}";
-        }
-        this.StateHasChanged();
+
+
     }
 
     void Close()
     {
-        showDivTwo = showRed = showGreen = false;
-        showDivOne = showError = true;
-        payLoad.AccountNumber = null;
-        consent = null;
-        errorMsg = string.Empty;
-        this.StateHasChanged();
+        try
+        {
+            showDivTwo = showRed = showGreen = false;
+            showDivOne = showError = true;
+            payLoad.AccountNumber = null;
+            consent = null;
+            errorMsg = string.Empty;
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+
+            Log.Error($"{user.Identity.Name} | {ex.Message}");
+        }
+
     }
 
     public async Task ReadFile()
@@ -201,22 +244,31 @@ else if (showRed == true)
         foreach (var file in await fileReaderService.CreateReference(inputTypeFileElement).EnumerateFilesAsync())
         {
             IFileInfo fileInfo = await file.ReadFileInfoAsync();
-            if (fileInfo.Name.EndsWith("pdf"))
+
+            try
             {
-                using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync(4096))
+                if (fileInfo.Name.EndsWith("pdf"))
                 {
-                    showError = false;
-                    await service.UploadAsync(memoryStream, fResponse);
+                    using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync(4096))
+                    {
+                        showError = false;
+                        await service.UploadAsync(memoryStream, fResponse);
+                    }
+
+                    Check();
+
                 }
-
-                Check();
-
+                else
+                {
+                    showError = true;
+                    errorMsg = "File must be a PDF...";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                showError = true;
-                errorMsg = "File must be a PDF...";
+                Log.Error($"{user.Identity.Name} | {ex.Message}");
             }
+
         }
     }
 }

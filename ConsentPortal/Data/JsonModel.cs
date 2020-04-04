@@ -7,7 +7,6 @@ namespace ConsentPortal.Data
 {
     public class Request
     {
-
         public string AccountNumber { get; set; }
     }    
     
