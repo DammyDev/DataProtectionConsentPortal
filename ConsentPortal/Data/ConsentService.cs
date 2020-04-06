@@ -6,6 +6,8 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.DirectoryServices;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace ConsentPortal.Data
 {
@@ -13,11 +15,13 @@ namespace ConsentPortal.Data
     {
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _environment;
+        //private readonly CustomAuthStateProvider _authenticationStateProvider;
 
-        public ConsentService(IConfiguration configuration, IWebHostEnvironment env)
+        public ConsentService(IConfiguration configuration, IWebHostEnvironment env /*CustomAuthStateProvider authenticationStateProvider*/)
         {
             _configuration = configuration;
             _environment = env;
+            //_authenticationStateProvider = authenticationStateProvider;
         }
 
         public async Task<Consent> GetCif(string cif)
@@ -42,5 +46,40 @@ namespace ConsentPortal.Data
             return result;
         }
 
+        public bool Authenticate(string domain, string userName, string password)
+        {
+            string domainAndUsername = domain + "\\" + userName;
+
+            try
+            {
+                using (DirectoryEntry entry = new DirectoryEntry("LDAP://172.27.4.83", domainAndUsername, password))
+                {
+                    using DirectorySearcher search = new DirectorySearcher(entry)
+                    {
+                        Filter = "(SAMAccountName=" + userName + ")"
+                    };
+
+                    search.PropertiesToLoad.Add("dn");
+                    search.PropertiesToLoad.Add("cn");
+                    search.PropertiesToLoad.Add("SAMAccountName");
+                    SearchResult result = search.FindOne();
+
+                    if (result == null)
+                        return false;
+                }
+                
+                return true;
+               
+            }
+            catch (DirectoryServicesCOMException ex)
+            {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+        }
     }
 }

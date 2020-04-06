@@ -1,0 +1,75 @@
+﻿
+@page "/loginControl"
+@using System.Web;
+<AuthorizeView>
+    <Authorized>
+        @*<div class="row">
+
+            <div class="col-md-auto mb-3">
+                <h4> Hello, @context.User.Identity.Name! </h4>
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <a href="/logout?returnUrl=/"
+                   target="_top">
+                    Logout
+                </a>
+            </div>
+        </div>*@
+    </Authorized>
+    <NotAuthorized>
+        @*<input type="text"
+               placeholder="User Name"
+               @bind="@Username" />
+        &nbsp;&nbsp;
+        <input type="password"
+               placeholder="Password"
+               @bind="@Password" />
+        <a class="ml-md-auto btn btn-primary"
+           href="/login?paramUsername=@encode(@Username)&paramPassword=@encode(@Password)"
+           target="_top">Login</a>*@
+
+
+        <br />
+        <br />
+
+        <div class="row" style="text-align:center;">
+
+            <div class="col-md-4 mb-3">
+
+            </div>
+
+            <div class="col-md-4 mb-3" style="display:inline-block">
+
+                <div>
+                    <p>
+                        <MatTextField @bind-Value="@Username" Label="Email" FullWidth="true"></MatTextField>
+                    </p>
+
+                    <p>
+                        <MatTextField @bind-Value="@Password" Label="Password" Icon="lock_outline" IconTrailing="true" FullWidth="true" Required="true" Type="password"></MatTextField>
+                    </p>
+
+                    @*<MatButton Unelevated="true" Type="Button" Link="@linkURL">Log In</MatButton>*@
+                    <a class="ml-md-auto btn btn-primary"
+                       href="/login?paramUsername=@encode(@Username)&paramPassword=@encode(@Password)"
+                       target="_top">Login</a>
+
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    string Username = "";
+    string Password = "";
+  
+    private string encode(string param)
+    {
+        return HttpUtility.UrlEncode(param);
+    }
+}

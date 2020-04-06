@@ -1,8 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
-@*<div class="sidebar">
-    <NavMenu />
-</div>*@
+@using System.Web;
+@using Microsoft.AspNetCore.Mvc;
+@using ConsentPortal.Pages
 
 <div class="main">
     <div class="top-row px-4" style="background-color:purple">
@@ -11,12 +11,81 @@
         </a>
         <h3 style="color:white"> DATA PROTECTION CONSENT PORTAL</h3>
 
-        <a href="" target="_blank">
-           Profile
-        </a>
+        <AuthorizeView>
+            <Authorized>
+                @context.User.Identity.Name!
+                <a href="/logout?returnUrl=/"
+                   target="_top">
+                    Logout
+                </a>
+            </Authorized>
+            <NotAuthorized>
+                <div></div><a></a>
+                </NotAuthorized>
+        </AuthorizeView>
+
     </div>
 
     <div class="content px-4">
-        @Body
+        <AuthorizeView>
+            <Authorized>
+                @Body
+            </Authorized>
+            <NotAuthorized>
+                <br />
+                <br />
+
+                <div class="row" style="text-align:center;">
+
+                    <div class="col-md-4 mb-3">
+
+                    </div>
+
+                    <div class="col-md-4 mb-3" style="display:inline-block">
+
+                        <div>
+                            <p>
+                                <MatTextField @bind-Value="@Username" Label="Email" FullWidth="true"></MatTextField>
+                            </p>
+
+                            <p>
+                                <MatTextField @bind-Value="@Password" Label="Password" Icon="lock_outline" IconTrailing="true" FullWidth="true" Required="true" Type="password"></MatTextField>
+                            </p>
+
+                            <a class="ml-md-auto btn btn-primary" href="/login?paramUsername=@encode(@Username)&paramPassword=@encode(@Password)" target="_top">
+                                Login
+                            </a>
+
+                            <button class="btn-sm btn-outline-primary" style="width:100%;" @onclick="@Generate">Generate</button>
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                    </div>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+
     </div>
 </div>
+
+@code {
+
+    LoginModel loginModel = new LoginModel();
+    string Username = "";
+    string Password = "";
+    //string encoded => HttpUtility.UrlEncode($"/login?paramUsername={Username}&paramPassword={Password}");
+
+    private string encode(string param)
+    {
+        var xx = HttpUtility.UrlEncode(param);
+        return xx;
+    }
+
+      void Generate()
+    {
+         loginModel.OnGetAsync(Username, Password);
+    }
+}
