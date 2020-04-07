@@ -1,13 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace ConsentPortal
@@ -18,7 +10,7 @@ namespace ConsentPortal
         {
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
-                .WriteTo.File(@"C:\logs\log.txt")
+                .WriteTo.File(@"C:\logs\ConsentPortal\log.txt")
                 .CreateLogger();
             CreateHostBuilder(args).Build().Run();
         }

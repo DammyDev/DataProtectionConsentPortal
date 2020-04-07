@@ -20,16 +20,20 @@
     <div id="DivOne">
         <br />
         <EditForm Model="@payLoad" OnValidSubmit="@Check">
-            <div style="margin-bottom:15px">
-                Please enter customer's account number here:
-                <input type="text" class="form-control-sm" @bind="payLoad.AccountNumber" required />
+            <div class="row" style="margin-bottom:15px">
+                <div class="col-md-7 mb-3">
+                    Please enter customer's account number here:
+                    <input type="text" class="form-control-sm" @bind="payLoad.AccountNumber" required />
 
-                <button class="btn-sm btn-outline-primary" type="submit">Check </button>
+                    <button class="btn-sm btn-outline-primary" type="submit">Check </button>
+                </div>
 
-                @if (showError == true)
-                {
-                    <span id="error" style="color:red; font-stretch:narrower"> <em>@errorMsg</em></span>
-                }
+                <div class="col-md-5 mb-3">
+                    @if (showError == true)
+                    {
+                        <span id="error" style="color:red; font-stretch:narrower"> <em>@errorMsg</em></span>
+                    }
+                </div>
             </div>
         </EditForm>
     </div>
@@ -198,14 +202,17 @@ else if (showRed == true)
                 errorMsg = $"Something went wrong! Error: {responseMsg.StatusCode}";
                 Log.Error($"{user.Identity.Name} | {errorMsg}");
             }
-            this.StateHasChanged();
-
         }
         catch (Exception ex)
         {
+            showError = true;
+            errorMsg = $"{ex.Message}";
             Log.Error($"{user.Identity.Name} | {ex.Message}");
         }
-
+        finally
+        {
+            this.StateHasChanged();
+        }
 
     }
 
