@@ -1,108 +1,120 @@
-﻿@page "/"
+﻿@page "/ConsentPage"
 
 @using ConsentPortal.Data
 @using Newtonsoft.Json
 @using Blazor.FileReader
 @using System.IO
+@using Serilog;
+@using System.Security.Claims
+@using Microsoft.Extensions.Configuration
 
 @inject ConsentService service
 @inject IFileReaderService fileReaderService;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IConfiguration _config
 
 
-    <div>
-        @if (showDivOne == true)
-        {
-            <div id="DivOne">
+<AuthorizeView>
+    <Authorized>
+        <div>
+            @if (showDivOne == true)
+            {
+                <div id="DivOne">
 
-                <EditForm Model="@payLoad" OnValidSubmit="@Check">
-                    <div style="margin-bottom:15px">
-                        Please enter customer's account number here:
-                        <input type="text" class="form-control-sm" @bind="payLoad.AccountNumber" required />
+                    <EditForm Model="@payLoad" OnValidSubmit="@Check" Context="DivOne">
+                        <div style="margin-bottom:15px">
+                            Please enter customer's account number here:
+                            <input type="text" class="form-control-sm" @bind="payLoad.AccountNumber" required />
 
-                        <button class="btn-sm btn-outline-primary" type="submit">Check </button>
+                            <button class="btn-sm btn-outline-primary" type="submit">Check </button>
 
-                        @if (showError == true)
-                        {
-                            <span id="error" style="color:red; font-stretch:narrower"> <em>@errorMsg</em></span>
-                        }
-                    </div>
-                </EditForm>
-
-            </div>
-        }
-
-        @if (showDivTwo == true)
-        {
-            <div id="DivTwo">
-                <h5>
-                    <br />
-                    Account Number: <strong>@payLoad.AccountNumber</strong>
-                </h5>
-            </div>
-        }
-
-        @if (showProgress == true)
-        {
-            <div>
-                <MatProgressBar Indeterminate="true"></MatProgressBar>
-            </div>
-        }
-
-        @if (showGreen == true)
-        {
-            <div class="alert alert-success alert-dismissible" role="alert">
-                <h5 class="card-header">@fResponse.Name | @fResponse.CIF | @payLoad.AccountNumber</h5>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <div class="card-body">
-                    <h6 class="alert-heading">Well done!</h6>
-                    <p>We received this customer's consent successfully on @consent.DateCreated</p>
-                    <hr>
-                    <p class="mb-0">Thank you.</p>
-                </div>
-            </div>
-        }
-        else if (showRed == true)
-        {
-            <div class="alert alert-danger alert-dismissible" role="alert">
-                <h5 class="card-header">@fResponse.Name | @fResponse.CIF | @payLoad.AccountNumber</h5>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <div class="card-body">
-                    <h6 class="alert-heading">Oops! No consent yet!</h6>
-                    <p>Kindly encourage the customer to give consent by filling this <a target="_blank" class="font-weight-bold" href="#">consent form</a> correctly and completely. </p>
-                    <p>You are required to verify the customer's signature on the form and upload a legibly scanned PDF copy.</p>
-                    <hr>
-                    <EditForm Model="@uploadModel" OnValidSubmit="@ReadFile">
-                        <div class="input-group">
-                            <div class="custom-file">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1" @bind="uploadModel.IsConsentReceived" required>
-                                    <label class="form-check-label" for="inlineCheckbox1">The customer has signed and given consent</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2" @bind="uploadModel.IsSignatureVerified" required>
-                                    <label class="form-check-label" for="inlineCheckbox2"> I have verified the signature.</label>
-                                </div>
-                            </div>
-                            <div class="input-group-append">
-
-                                @if (showError == true)
-                                {
-                                    <span id="error" style="color:red; font-stretch:narrower; padding-right:5px"> <em>@errorMsg</em></span>
-                                }
-                                <input type="file" @ref=inputTypeFileElement required />
-                                <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
-
-                            </div>
+                            @if (showError == true)
+                            {
+                                <span id="error" style="color:red; font-stretch:narrower"> <em>@errorMsg</em></span>
+                            }
                         </div>
                     </EditForm>
+
                 </div>
-            </div>
-        }
-    </div>
+            }
+
+            @if (showDivTwo == true)
+            {
+                <div id="DivTwo">
+                    <h5>
+                        <br />
+                        Account Number: <strong>@payLoad.AccountNumber</strong>
+                    </h5>
+                </div>
+            }
+
+            @if (showProgress == true)
+            {
+                <div>
+                    <MatProgressBar Indeterminate="true"></MatProgressBar>
+                </div>
+            }
+
+            @if (showGreen == true)
+            {
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <h5 class="card-header">@fResponse.acctName | @fResponse.cif_id | @payLoad.AccountNumber</h5>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="card-body">
+                        <h6 class="alert-heading">Well done!</h6>
+                        <p>We received this customer's consent successfully on @consent.DateCreated</p>
+                        <hr>
+                        <p class="mb-0">Thank you.</p>
+                    </div>
+                </div>
+            }
+            else if (showRed == true)
+            {
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <h5 class="card-header">@fResponse.acctName | @fResponse.cif_id | @payLoad.AccountNumber</h5>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="card-body">
+                        <h6 class="alert-heading">Oops! No consent yet!</h6>
+                        <p>Kindly encourage the customer to give consent by filling this <a target="_blank" class="font-weight-bold" href="#">consent form</a> correctly and completely. </p>
+                        <p>You are required to verify the customer's signature on the form and upload a legibly scanned PDF copy.</p>
+                        <hr>
+                        <EditForm Model="@uploadModel" OnValidSubmit="@ReadFile" Context="DivTwo">
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1" @bind="uploadModel.IsConsentReceived" required>
+                                        <label class="form-check-label" for="inlineCheckbox1">The customer has signed and given consent</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2" @bind="uploadModel.IsSignatureVerified" required>
+                                        <label class="form-check-label" for="inlineCheckbox2"> I have verified the signature.</label>
+                                    </div>
+                                </div>
+                                <div class="input-group-append">
+
+                                    @if (showError == true)
+                                    {
+                                        <span id="error" style="color:red; font-stretch:narrower; padding-right:5px"> <em>@errorMsg</em></span>
+                                    }
+                                    <input type="file" @ref=inputTypeFileElement required />
+                                    <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
+
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <a href="login"><h5>Click here to Login</h5></a>
+    </NotAuthorized>
+</AuthorizeView>
 
 
 
@@ -129,18 +141,17 @@
     bool showProgress => !showError;
     string errorMsg;
 
-    protected override void OnInitialized()
+    AuthenticationState authState;
+    ClaimsPrincipal user;
+
+    protected override async Task OnInitializedAsync()
     {
-        //base.OnInitialized();
-        //try
-        //{
-        //    // Set the user to determine if they are logged in
-        //    User = _httpContextAccessor.HttpContext.User;
-        //}
-        //catch
-        //{
-        //}
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        Log.Information($"{user.Identity.Name} logged in");
     }
+
+
 
     async void Check()
     {
@@ -149,59 +160,91 @@
         uploadModel.IsSignatureVerified = false;
         uploadModel.IsConsentReceived = false;
 
-        if (payLoad.AccountNumber != null)
+        try
         {
-            responseMsg = await Http.GetAsync($"http://my-json-server.typicode.com/dammydev/fiservice/accounts/{payLoad.AccountNumber.ToString()}");
-        }
-
-        if (responseMsg.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            showDivOne = showRed = showGreen = false;
-            showDivTwo = showError = true;
-
-            var responseContent = await responseMsg.Content.ReadAsStringAsync();
-            fResponse = JsonConvert.DeserializeObject<FinacleResponse>(responseContent);
-
-            if (fResponse != null)
+            if (payLoad.AccountNumber != null)
             {
-                consent = await service.GetCif(fResponse.CIF);
+                var requestUri = $"{_config.GetValue<string>("Settings:BaseUrl")}?acctnum={payLoad.AccountNumber}&appID={_config.GetValue<string>("Settings:AppId")}";
 
-                if (consent == null)
+                responseMsg = await Http.GetAsync(requestUri);
+                Log.Information($"{user.Identity.Name} |FI_Service called {requestUri}");
+            }
+
+            if (responseMsg.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+
+                showDivOne = showRed = showGreen = false;
+                showDivTwo = showError = true;
+
+                var responseContent = await responseMsg.Content.ReadAsStringAsync();
+                fResponse = JsonConvert.DeserializeObject<FinacleResponse>(responseContent);
+
+                if (fResponse != null)
                 {
-                    showRed = true;
+                    Log.Information($"{DateTime.Now} | FI_Service Response:{responseMsg.StatusCode.ToString()} Content: {payLoad.AccountNumber} {fResponse.cif_id} '{fResponse.acctName}'");
+                    consent = await service.GetCif(fResponse.cif_id);
+
+                    if (consent == null)
+                    {
+                        showRed = true;
+                        Log.Information($"{DateTime.Now} | Database Response: {fResponse.cif_id} not found. ");
+
+                    }
+                    else
+                    {
+                        showGreen = true;
+                        Log.Information($"{DateTime.Now} | Database Response: {fResponse.cif_id} found.  ");
+                    }
                 }
                 else
                 {
-                    showGreen = true;
+
                 }
+
+            }
+            else if (responseMsg.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                showError = true;
+                errorMsg = "Not Found on Finacle! Please retry with a valid Account Number.";
+                Log.Information($"{user.Identity.Name} | {payLoad.AccountNumber} {errorMsg}");
             }
             else
             {
-
+                showError = true;
+                errorMsg = $"Something went wrong! Error: {responseMsg.StatusCode}";
+                Log.Error($"{user.Identity.Name} | {errorMsg}");
             }
+        }
+        catch (Exception ex)
+        {
+            showError = true;
+            errorMsg = $"{ex.Message}";
+            Log.Error($"{user.Identity.Name} | {ex.Message}");
+        }
+        finally
+        {
+            this.StateHasChanged();
+        }
 
-        }
-        else if (responseMsg.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            showError = true;
-            errorMsg = "Not Found on Finacle! Please retry with a valid Account Number.";
-        }
-        else
-        {
-            showError = true;
-            errorMsg = $"Something went wrong! Error: {responseMsg.StatusCode}";
-        }
-        this.StateHasChanged();
     }
 
     void Close()
     {
-        showDivTwo = showRed = showGreen = false;
-        showDivOne = showError = true;
-        payLoad.AccountNumber = null;
-        consent = null;
-        errorMsg = string.Empty;
-        this.StateHasChanged();
+        try
+        {
+            showDivTwo = showRed = showGreen = false;
+            showDivOne = showError = true;
+            payLoad.AccountNumber = null;
+            consent = null;
+            errorMsg = string.Empty;
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+
+            Log.Error($"{user.Identity.Name} | {ex.Message}");
+        }
+
     }
 
     public async Task ReadFile()
@@ -220,23 +263,31 @@
         foreach (var file in await fileReaderService.CreateReference(inputTypeFileElement).EnumerateFilesAsync())
         {
             IFileInfo fileInfo = await file.ReadFileInfoAsync();
-            if (fileInfo.Name.EndsWith("pdf"))
+
+            try
             {
-                using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync(4096))
+                if (fileInfo.Name.EndsWith("pdf"))
                 {
-                    showError = false;
-                    await service.UploadAsync(memoryStream, fResponse);
+                    using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync(4096))
+                    {
+                        showError = false;
+                        await service.UploadAsync(memoryStream, fResponse);
+                    }
+
+                    Check();
+
                 }
-
-                Check();
-
+                else
+                {
+                    showError = true;
+                    errorMsg = "File must be a PDF...";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                showError = true;
-                errorMsg = "File must be a PDF...";
+                Log.Error($"{user.Identity.Name} | {ex.Message}");
             }
+
         }
     }
 }
-

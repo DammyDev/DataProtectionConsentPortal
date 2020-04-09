@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net.Http;
+using Microsoft.AspNetCore.Components.Server;
 
 namespace ConsentPortal
 {
@@ -34,14 +35,20 @@ namespace ConsentPortal
         {
 
             // BLAZOR COOKIE Auth Code (begin)
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+            //services.Configure<CookiePolicyOptions>(options =>
+            //{
+            //    options.CheckConsentNeeded = context => true;
+            //    options.MinimumSameSitePolicy = SameSiteMode.None;
+            //});
+            //services.AddAuthentication(
+            //    CookieAuthenticationDefaults.AuthenticationScheme)
+            //    .AddCookie();
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => {
+                options.LoginPath = "/login";
+                options.AccessDeniedPath = "/AccessDenied";
             });
-            services.AddAuthentication(
-                CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie();
+
             // BLAZOR COOKIE Auth Code (end)
 
             services.AddRazorPages();
@@ -49,6 +56,13 @@ namespace ConsentPortal
             services.AddSingleton<ConsentService>();
             services.AddFileReaderService();
             //services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+            services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+                            // setting up policies
+            services.AddAuthorization(options => {
+                options.AddPolicy("MustBeNinja", p => p.RequireAuthenticatedUser().RequireClaim("Role", "ninja"));
+                options.AddPolicy("MustBePirate", p => p.RequireAuthenticatedUser().RequireClaim("Role", "pirate"));
+                options.AddPolicy("MustBeNinjaOrPirate", p => p.RequireAuthenticatedUser().RequireClaim("Role", "pirate", "ninja"));
+            });
 
             // BLAZOR COOKIE Auth Code (begin)
             // From: https://github.com/aspnet/Blazor/issues/1554
@@ -76,10 +90,12 @@ namespace ConsentPortal
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseCookiePolicy();
-            app.UseAuthentication();
+            //app.UseCookiePolicy();
 
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

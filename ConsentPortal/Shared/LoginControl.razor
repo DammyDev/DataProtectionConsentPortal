@@ -1,75 +1,30 @@
-﻿
-@page "/loginControl"
-@using System.Web;
+﻿@inject IJSRuntime jsRuntime
+
 <AuthorizeView>
     <Authorized>
-        @*<div class="row">
-
-            <div class="col-md-auto mb-3">
-                <h4> Hello, @context.User.Identity.Name! </h4>
-            </div>
-
-            <div class="col-md-2 mb-3">
-                <a href="/logout?returnUrl=/"
-                   target="_top">
-                    Logout
-                </a>
-            </div>
-        </div>*@
+        <!--TODO Rider cannot find the context, but it is there, and compiles. No worries-->
+        <span style="color:antiquewhite"> @context.User.Identity.Name</span>
+        <button @onclick="Logout" class="nav-link btn btn-link">Log out</button>
     </Authorized>
     <NotAuthorized>
-        @*<input type="text"
-               placeholder="User Name"
-               @bind="@Username" />
-        &nbsp;&nbsp;
-        <input type="password"
-               placeholder="Password"
-               @bind="@Password" />
-        <a class="ml-md-auto btn btn-primary"
-           href="/login?paramUsername=@encode(@Username)&paramPassword=@encode(@Password)"
-           target="_top">Login</a>*@
-
-
-        <br />
-        <br />
-
-        <div class="row" style="text-align:center;">
-
-            <div class="col-md-4 mb-3">
-
-            </div>
-
-            <div class="col-md-4 mb-3" style="display:inline-block">
-
-                <div>
-                    <p>
-                        <MatTextField @bind-Value="@Username" Label="Email" FullWidth="true"></MatTextField>
-                    </p>
-
-                    <p>
-                        <MatTextField @bind-Value="@Password" Label="Password" Icon="lock_outline" IconTrailing="true" FullWidth="true" Required="true" Type="password"></MatTextField>
-                    </p>
-
-                    @*<MatButton Unelevated="true" Type="Button" Link="@linkURL">Log In</MatButton>*@
-                    <a class="ml-md-auto btn btn-primary"
-                       href="/login?paramUsername=@encode(@Username)&paramPassword=@encode(@Password)"
-                       target="_top">Login</a>
-
-                </div>
-            </div>
-
-            <div class="col-md-4 mb-3">
-
-            </div>
-        </div>
+        @*<a href="register">Register</a>*@
+        @*<a href="login">Login</a>*@
+        @*<RedirectToLogin />*@
+        
     </NotAuthorized>
 </AuthorizeView>
+
 @code {
-    string Username = "";
-    string Password = "";
-  
-    private string encode(string param)
-    {
-        return HttpUtility.UrlEncode(param);
+    public async Task Logout() {
+
+        Console.WriteLine("Logout here");
+        var interop = new Interop(jsRuntime);
+        string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
+        
+        // Here I provide fields matching the arguments of my logout method, i.e. none. Could have a returnURL
+        // see the example downloadable from here:
+        // https://www.oqtane.org/Resources/Blog/PostId/527/exploring-authentication-in-blazor?fbclid=IwAR0rbQkY47cHHxs29HWCk0RggH7GHeLDx3kJ4vwmgUGMTsFU3hxpsQ9ybZo
+        var fields = new {__RequestVerificationToken = antiforgerytoken};
+        await interop.SubmitForm("/logoutRequester/", fields);
     }
 }

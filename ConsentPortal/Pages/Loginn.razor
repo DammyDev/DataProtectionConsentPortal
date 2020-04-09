@@ -1,0 +1,88 @@
+﻿@*@page "/{id=0:int}"*@
+
+@page "/"
+@page "/{msg}"
+
+@inject IJSRuntime jsRuntime
+
+<br />
+<br />
+
+<div class="row" style="text-align:center;">
+
+    <div class="col-md-4 mb-3">
+
+    </div>
+
+    <div class="col-md-4 mb-3" style="display:inline-block">
+
+        <div>
+            <p>
+                <MatTextField @bind-Value="@_username" Label="Email" FullWidth="true" Required="true"></MatTextField>
+            </p>
+
+            <p>
+                <MatTextField @bind-Value="@_password" Label="Password" Icon="lock_outline" IconTrailing="true" FullWidth="true" Required="true" Type="password"></MatTextField>
+            </p>
+
+            <button class="btn-sm btn-outline-primary" style="width:100%;" @onclick="PerformLogin">Generate</button>
+            <p class="alert-danger"><em>@msg</em></p>
+
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+
+    </div>
+</div>
+
+@code {
+
+    private string _username;
+    private string _password;
+    //private string msg;
+
+    [Parameter]
+    public string msg { get; set; }
+
+    //Executes on page open, set defaults on page
+    protected override  void OnInitialized()
+    {
+
+        if (msg == "Unauthorized")
+        {
+            msg = "Oops! Your credentials may be incorrect.";
+        }
+        else if (msg == "blank")
+        {
+            msg = " Username and Password are required";
+        }
+        else
+        {
+            msg = "";
+        }
+
+
+
+
+    }
+
+
+    public async Task PerformLogin()
+    {
+        Console.WriteLine("Login here");
+
+        // TODO get and verify username and password here against database
+
+        var interop = new Interop(jsRuntime);
+        string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
+
+        // Here I provide fields matching the arguments of my login method, in LoginRequester.cshtml.cs
+        var fields = new { __RequestVerificationToken = antiforgerytoken, username = _username, password = _password };
+
+        // Here I make a call to the loginRequester.cshtml.cs, the post method, with fields as argument.
+        // it happens through the Interop.cs class
+        await interop.SubmitForm("/loginRequester/", fields);
+    }
+
+}

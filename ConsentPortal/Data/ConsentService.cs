@@ -35,13 +35,13 @@ namespace ConsentPortal.Data
 
         public async Task<int> UploadAsync(MemoryStream ms, FinacleResponse response)
         {
-            var path = Path.Combine(_environment.WebRootPath, "Documents", $"{response.CIF}.pdf");
+            var path = Path.Combine(_environment.WebRootPath, "Documents", $"{response.cif_id}.pdf");
             using FileStream file = new FileStream(path, FileMode.Create, FileAccess.Write);
             ms.WriteTo(file);
 
             using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             connection.Open();  
-            string sQuery = $"INSERT INTO dbConsent.dbo.NDPR (CustomerId, IsNDPRAccepted, DateCreated,CIF,CustomerName, FilePath) VALUES (null, 1, GETDATE(), '{response.CIF}','{response.Name}','{path}')";
+            string sQuery = $"INSERT INTO dbConsent.dbo.NDPR (CustomerId, IsNDPRAccepted, DateCreated,CIF,CustomerName, FilePath) VALUES (null, 1, GETDATE(), '{response.cif_id}','{response.acctName}','{path}')";
             var result = await connection.ExecuteAsync(sQuery);
             return result;
         }
