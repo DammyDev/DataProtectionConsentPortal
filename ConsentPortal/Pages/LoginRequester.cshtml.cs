@@ -17,20 +17,13 @@ namespace ConsentPortal.Pages
         public async Task<IActionResult> OnPostAsync(string username, string password)
         {
             Console.WriteLine("Posting here..");
-            try
-            {
-                // Clear the existing external cookie
-                await HttpContext
-                    .SignOutAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme);
-            }
-            catch { }
 
             if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
             {
 
                 ActiveDirectory ad = new ActiveDirectory();
                 bool res = ad.Authenticate("Wemabank", username, password);
+                //bool res = true;
 
                 var claims = new List<Claim>{
                     new Claim(ClaimTypes.Name, username)
@@ -47,7 +40,7 @@ namespace ConsentPortal.Pages
                         CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
                     Log.Information($"{username} logged in");
-                    return LocalRedirect(Url.Content("~/"));
+                    return LocalRedirect(Url.Content("~/ConsentPage"));
                 }
                 else
                 {
