@@ -1,4 +1,5 @@
-﻿@page "/ConsentPage"
+﻿@page "/"
+@page "/{msg}"
 
 @using ConsentPortal.Data
 @using Newtonsoft.Json
@@ -12,7 +13,7 @@
 @inject IFileReaderService fileReaderService;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IConfiguration _config
-
+@inject IJSRuntime jsRuntime
 
 <AuthorizeView>
     <Authorized>
@@ -22,17 +23,24 @@
                 <div id="DivOne">
 
                     <EditForm Model="@payLoad" OnValidSubmit="@Check" Context="DivOne">
-                        <div style="margin-bottom:15px">
-                            Please enter customer's account number here:
-                            <input type="text" class="form-control-sm" @bind="payLoad.AccountNumber" required />
 
-                            <button class="btn-sm btn-outline-primary" type="submit">Check </button>
+                        <div class="row" style="margin-bottom:15px">
+                            <div class="col-md-7 mb-3">
+                                Please enter customer's account number here:
+                                <input type="text" class="form-control-sm" @bind="payLoad.AccountNumber" required />
 
-                            @if (showError == true)
-                            {
-                                <span id="error" style="color:red; font-stretch:narrower"> <em>@errorMsg</em></span>
-                            }
+                                <button class="btn-sm btn-outline-primary" type="submit">Check </button>
+                            </div>
+
+                            <div class="col-md-5 mb-3">
+                                @if (showError == true)
+                                {
+                                    <span id="error" style="color:red; font-stretch:narrower"> <em>@errorMsg</em></span>
+                                }
+                            </div>
                         </div>
+
+
                     </EditForm>
 
                 </div>
@@ -112,27 +120,52 @@
         </div>
     </Authorized>
     <NotAuthorized>
-        <a href="login"><h5>Click here to Login</h5></a>
+        <br />
+        <br />
+
+        <div class="row" style="text-align:center;">
+
+            <div class="col-md-4 mb-3">
+
+            </div>
+
+            <div class="col-md-4 mb-3" style="display:inline-block">
+
+                <div>
+                    <p>
+                        <MatTextField @bind-Value="@_username" Label="Username" FullWidth="true" Required="true" PlaceHolder="                     damilola.eludire"></MatTextField>
+                    </p>
+
+                    <p>
+                        <MatTextField @bind-Value="@_password" Label="Password" Icon="lock_outline" IconTrailing="true" FullWidth="true" Required="true" Type="password"></MatTextField>
+                    </p>
+
+                    <button class="btn-sm btn-outline-primary" style="width:100%;" @onclick="PerformLogin">L O G I N</button>
+                    <p class="alert-danger"><em>@msg</em></p>
+
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+            </div>
+        </div>
+
     </NotAuthorized>
+    <Authorizing> Kindly wait while we sign you in..</Authorizing>
 </AuthorizeView>
 
-
-
-
-
 @code {
-
-    //private ClaimsPrincipal User;
-
     ElementReference inputTypeFileElement;
     HttpClient Http = new HttpClient();
     HttpResponseMessage responseMsg = new HttpResponseMessage();
     FinacleResponse fResponse = new FinacleResponse();
     Request payLoad = new Request();
     Consent consent = new Consent();
-
     UploadModel uploadModel = new UploadModel();
 
+    private string _username;
+    private string _password;
     bool showGreen = false;
     bool showRed = false;
     bool showDivOne = true;
@@ -144,14 +177,27 @@
     AuthenticationState authState;
     ClaimsPrincipal user;
 
+    [Parameter]
+    public string msg { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         user = authState.User;
-        Log.Information($"{user.Identity.Name} logged in");
+
+        if (msg == "Unauthorized")
+        {
+            msg = "Oops! Your credentials may be incorrect.";
+        }
+        else if (msg == "blank")
+        {
+            msg = " Username and Password are required";
+        }
+        else
+        {
+            msg = "";
+        }
     }
-
-
 
     async void Check()
     {
@@ -289,5 +335,22 @@
             }
 
         }
+    }
+
+    public async Task PerformLogin()
+    {
+        Console.WriteLine("Login here");
+
+        // TODO get and verify username and password here against database
+
+        var interop = new Interop(jsRuntime);
+        string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
+
+        // Here I provide fields matching the arguments of my login method, in LoginRequester.cshtml.cs
+        var fields = new { __RequestVerificationToken = antiforgerytoken, username = _username, password = _password };
+
+        // Here I make a call to the loginRequester.cshtml.cs, the post method, with fields as argument.
+        // it happens through the Interop.cs class
+        await interop.SubmitForm("/loginRequester/", fields);
     }
 }

@@ -2,14 +2,12 @@
 
 <AuthorizeView>
     <Authorized>
-        <!--TODO Rider cannot find the context, but it is there, and compiles. No worries-->
         <span style="color:antiquewhite"> @context.User.Identity.Name</span>
         <button @onclick="Logout" class="nav-link btn btn-link">Log out</button>
     </Authorized>
     <NotAuthorized>
         @*<a href="register">Register</a>*@
         @*<a href="login">Login</a>*@
-        @*<RedirectToLogin />*@
         
     </NotAuthorized>
 </AuthorizeView>
@@ -21,9 +19,6 @@
         var interop = new Interop(jsRuntime);
         string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
         
-        // Here I provide fields matching the arguments of my logout method, i.e. none. Could have a returnURL
-        // see the example downloadable from here:
-        // https://www.oqtane.org/Resources/Blog/PostId/527/exploring-authentication-in-blazor?fbclid=IwAR0rbQkY47cHHxs29HWCk0RggH7GHeLDx3kJ4vwmgUGMTsFU3hxpsQ9ybZo
         var fields = new {__RequestVerificationToken = antiforgerytoken};
         await interop.SubmitForm("/logoutRequester/", fields);
     }
