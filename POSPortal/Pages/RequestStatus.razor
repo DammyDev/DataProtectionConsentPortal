@@ -1,0 +1,185 @@
+﻿@page "/requeststatus"
+@page "/requeststatus/{msg}"
+
+@using POSPortal.Data
+@using POSPortal.Services
+@using System.Security.Claims
+
+@inject POSService service
+@inject IJSRuntime jsRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+
+<AuthorizeView>
+    <Authorized>
+        <div class="row">
+            <div class="col-md-auto mb-3"><h3>POS requests for Branch @branchCode</h3></div>
+
+            <div class="col-md-7 mb-3"></div>
+
+        </div>
+        <br />
+        @if (requests != null)
+        {
+            if (requests.Count() == 0)
+            {
+                <span>No request(s) found.</span>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Request Id</th>
+                            <th>Account Number</th>
+                            <th>Merchant Name</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in requests)
+                        {
+                            <tr>
+                                <td>@request.RequestId</td>
+                                <td>@request.AccountNumber</td>
+                                <td>@request.MerchantName</td>
+                                <td>@request.Status</td>
+                                <td>
+                                    | <MatButton Icon="create" OnClick="@(() => Edit(request.RequestId))"> </MatButton> |
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+        else
+        {
+            @if (string.IsNullOrEmpty(msg))
+            {
+                <span>Kindly log out and re-login.</span>
+            }
+            else
+            {
+                <span>Loading</span>
+            }
+        }
+
+    </Authorized>
+    <NotAuthorized>
+        <br />
+        <br />
+
+        <div class="row" style="text-align:center;">
+
+            <div class="col-md-4 mb-3">
+            </div>
+
+            <div class="col-md-4 mb-3" style="display:inline-block">
+                <div>
+                    <p>
+                        <MatTextField @bind-Value="@_username" Label="Username" FullWidth="true" Required="true"></MatTextField>
+                    </p>
+
+                    <p>
+                        <MatTextField @bind-Value="@_password" Label="Password" Icon="lock_outline" IconTrailing="true" FullWidth="true" Required="true" Type="password"></MatTextField>
+                    </p>
+
+                    <button class="btn-sm btn-outline-primary" style="width:100%;" @onclick="PerformLogin">L O G I N</button>
+                    <p class="text-danger"><em>@msg</em></p>
+
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+            </div>
+        </div>
+
+    </NotAuthorized>
+    <Authorizing> Kindly wait while we sign you in..</Authorizing>
+</AuthorizeView>
+
+@code{
+
+    private IEnumerable<POSRequest> requests;
+    //POSRequest request;
+    private string _username;
+    private string _password;
+    private string branchCode;
+
+    AuthenticationState authState;
+    ClaimsPrincipal user;
+
+    [Parameter]
+    public string msg { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //string branchCode = user.Claims.FirstOrDefault(c => c.Type == "BranchCode").Value;
+
+        //requests = await service.GetBySolId(branchCode);
+
+        if (msg == "Unauthorized")
+        {
+            msg = "Oops! Authentication failed.";
+        }
+        else if (msg == "blank")
+        {
+            msg = " Username and Password are required";
+        }
+        else if (string.IsNullOrEmpty(msg))
+        {
+            // navigationManager.NavigateTo($"/logout");
+        }
+        else
+        {
+            try
+            {
+                authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                user = authState.User;
+
+                branchCode = user.Claims.FirstOrDefault(c => c.Type == "BranchCode").Value;
+                requests = await service.GetBySolId(branchCode);
+            }
+            catch (Exception ex)
+            {
+                navigationManager.NavigateTo($"/requeststatus");
+            }
+
+
+        }
+    }
+
+    void Edit(string requestId)
+    {
+        navigationManager.NavigateTo($"/ReviewRequest/{requestId}");
+    }
+
+    public async Task PerformLogin()
+    {
+        Console.WriteLine("Login here");
+
+        // TODO get and verify username and password here against database
+
+        var interop = new Interop(jsRuntime);
+        string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
+
+        // Here I provide fields matching the arguments of my login method, in LoginRequester.cshtml.cs
+        var fields = new { __RequestVerificationToken = antiforgerytoken, username = _username, password = _password };
+
+        // Here I make a call to the loginRequester.cshtml.cs, the post method, with fields as argument.
+        // it happens through the Interop.cs class
+        await interop.SubmitForm("/loginRequester/", fields);
+    }
+
+    public async Task Logout() {
+
+        Console.WriteLine("Logout here");
+        var interop = new Interop(jsRuntime);
+        string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
+
+        var fields = new {__RequestVerificationToken = antiforgerytoken};
+        await interop.SubmitForm("/logoutRequester/", fields);
+    }
+}

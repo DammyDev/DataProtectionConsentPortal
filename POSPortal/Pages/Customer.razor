@@ -1,0 +1,113 @@
+﻿@page "/"
+@page "/customer"
+@page "/customer/{acc}"
+
+@using POSPortal.Resources
+@using POSPortal.Services
+
+@inject POSService service
+@inject NavigationManager navigationManager
+
+<div class="row">
+    <div class="col-md-2 mb-3">
+
+    </div>
+
+    <div class="col-md-8 mb-3">
+        <br />
+        <br />
+        @if (showWelcome)
+        {
+            <div class="card">
+
+                <div class="card-body" style="flex:auto">
+                    <h3 class="card-subtitle">Welcome,</h3>
+                    <br />
+                    <MatTextField @bind-Value="@accNo" Outlined="true" Label="Please enter your account number to begin" FullWidth="false" Style="width:290px" Required="true"></MatTextField>
+                    <MatButton Unelevated="true" @onclick="Begin">Begin</MatButton>
+                </div>
+
+            </div>
+        }
+
+
+        <div class="list-group" style="padding-top:3px">
+
+            @if (requests == null)
+            {
+                <p>request is NUll</p>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-md-8 mb-3"><h5 class="card-title" style="text-align:center">@requests.Count() Existing POS Requests for @accNo</h5></div>
+                    @*<div class="col-md-4 mb-3"><button type="button" class="btn btn-primary btn-sm" >Create New Request</button></div>*@
+                    <div class="col-md-4 mb-3"><a href="\newrequest\@accNo" class="btn btn-primary btn-sm">Create New Request</a></div>
+                </div>
+
+                <hr />
+                @foreach (var item in requests)
+                {
+                    <button type="button" class="list-group-item list-group-item-action" title="Click to edit." @onclick="@(() => Modify(@item))">
+                        @item.RequestId &emsp; @item.AccountNumber &emsp; @item.MerchantName
+                        <div style="float:right">
+                            @if (item.Status == "Declined")
+                            {
+                                <span class="badge badge-danger">@item.Status @item.DateUpdated.ToShortDateString() <small></small></span>
+                                <span class="badge badge-warning">@item.Comments <small></small></span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-info">@item.Status @item.DateUpdated.ToShortDateString() <small></small></span>
+                                <span class="badge badge-warning">@item.Comments <small></small></span>
+                            }
+
+                        </div>
+                    </button>
+                }
+            }
+        </div>
+
+    </div>
+
+    <div class="col-md-2 mb-3">
+
+    </div>
+
+
+</div>
+
+@code{
+
+    IEnumerable<POSRequestResource> requests;
+    string accNo;
+    bool showWelcome = true;
+
+    [Parameter]
+    public string acc { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(acc))
+        {
+            accNo = acc;
+            Begin();
+        }
+    }
+
+    async void Begin()
+    {
+        requests = await service.GetByAccount(accNo);
+        showWelcome = requests.Count() > 0 ? false : true;
+        this.StateHasChanged();
+    }
+
+    void Modify(POSRequestResource item)
+    {
+        if (item.Status == "Declined")
+        {
+            navigationManager.NavigateTo($"/ReviewRequest/cust/{item.RequestId}");
+        }
+    }
+
+}

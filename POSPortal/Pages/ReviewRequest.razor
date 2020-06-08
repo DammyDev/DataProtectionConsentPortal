@@ -1,0 +1,743 @@
+﻿@page "/ReviewRequest/{id}"
+@page "/ReviewRequest/{msg}/{id}"
+
+@using POSPortal.Services
+@using POSPortal.Data
+@using POSPortal.Extensions;
+@using Microsoft.Extensions.Configuration
+
+
+@inject NavigationManager navigationManager
+@inject IConfiguration _config
+@inject POSService service
+
+<style>
+    div.scroll {
+        margin: 4px, 4px;
+        padding: 4px;
+        width: auto;
+        height: 500px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        text-align: justify;
+    }
+
+    span.cls_002 {
+        font-family: Arial,serif;
+        font-size: 13.1px;
+        color: rgb(139,45,113);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_002 {
+        font-family: Arial,serif;
+        font-size: 13.1px;
+        color: rgb(139,45,113);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_003 {
+        font-family: Arial,serif;
+        font-size: 3.6px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_003 {
+        font-family: Arial,serif;
+        font-size: 3.6px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_004 {
+        font-family: Arial,serif;
+        font-size: 8.1px;
+        color: rgb(254,255,255);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_004 {
+        font-family: Arial,serif;
+        font-size: 8.1px;
+        color: rgb(254,255,255);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_005 {
+        font-family: Arial,serif;
+        font-size: 8.1px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_005 {
+        font-family: Arial,serif;
+        font-size: 8.1px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_006 {
+        font-family: Arial,serif;
+        font-size: 8.1px;
+        color: rgb(139,45,113);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_006 {
+        font-family: Arial,serif;
+        font-size: 8.1px;
+        color: rgb(139,45,113);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_008 {
+        font-family: Arial,serif;
+        font-size: 8.1px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_008 {
+        font-family: Arial,serif;
+        font-size: 8.1px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_009 {
+        font-family: Arial,serif;
+        font-size: 8.0px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_009 {
+        font-family: Arial,serif;
+        font-size: 8.0px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_007 {
+        font-family: Arial,serif;
+        font-size: 5.0px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_007 {
+        font-family: Arial,serif;
+        font-size: 5.0px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_010 {
+        font-family: Arial,serif;
+        font-size: 5.0px;
+        color: rgb(139,45,113);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_010 {
+        font-family: Arial,serif;
+        font-size: 5.0px;
+        color: rgb(139,45,113);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_011 {
+        font-family: Arial,serif;
+        font-size: 8.0px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_011 {
+        font-family: Arial,serif;
+        font-size: 8.0px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_012 {
+        font-family: Arial,serif;
+        font-size: 7.4px;
+        color: rgb(139,45,113);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_012 {
+        font-family: Arial,serif;
+        font-size: 7.4px;
+        color: rgb(139,45,113);
+        font-weight: bold;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_013 {
+        font-family: Arial,serif;
+        font-size: 7.4px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    div.cls_013 {
+        font-family: Arial,serif;
+        font-size: 7.4px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: normal;
+        text-decoration: none
+    }
+
+    span.cls_014 {
+        font-family: Arial,serif;
+        font-size: 7.4px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: italic;
+        text-decoration: none
+    }
+
+    div.cls_014 {
+        font-family: Arial,serif;
+        font-size: 7.4px;
+        color: rgb(139,45,113);
+        font-weight: normal;
+        font-style: italic;
+        text-decoration: none
+    }
+</style>
+
+
+
+<div class="row" style="text-align:center;">
+
+    <div class="col-md-1 mb-3">
+    </div>
+    <div class="col-md-10 mb-3" style="display:inline-block">
+        <EditForm Model="@request" OnValidSubmit="@OkClick">
+            <DataAnnotationsValidator />
+            <MatTabGroup Style="border:2px solid purple">
+
+                <MatTab Label="APPLICANT'S DETAILS">
+                    <div class="scroll" style="background-color:ghostwhite">
+                        <br />
+                        <div class="row">
+                            <div class="col-md-4 mb-3"><MatTextField @bind-Value="@request.AccountNumber" Label="Account No." FullWidth="true" Required="true" ReadOnly="true"></MatTextField></div>
+                            <div class="col-md-8 mb-3"><MatTextField @bind-Value="@request.MerchantName" Label="Company's Name" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3"> <MatTextField @bind-Value="@request.RCNumber" Label="RC Number" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-4 mb-3"> <MatTextField @bind-Value="@request.PhoneNo" Label="Phone Number" FullWidth="true" Required="true" ReadOnly="true"></MatTextField></div>
+                            <div class="col-md-4 mb-3"><MatTextField @bind-Value="@request.Email" Label="Email" FullWidth="true" Required="true" ReadOnly="true"></MatTextField></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-9 mb-3"><MatTextField @bind-Value="@request.TerminalLocation" Label="Terminal Location" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-3 mb-3"><MatTextField @bind-Value="@request.City" Label="City" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3"> <MatTextField @bind-Value="@request.LGA" Label="LGA" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-3 mb-3"> <MatTextField @bind-Value="@request.State" Label="State" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-3 mb-3"> <MatTextField @bind-Value="@request.NearestBusStop" Label="Nearest Bus Stop" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-3 mb-3"><MatTextField @bind-Value="@request.Landmark" Label="Landmark" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3"><MatTextField @bind-Value="@request.TradeName" Label="Trade Name" FullWidth="true" Required="true" ReadOnly="@isEnabled" HelperText="This name will appear on the receipt"></MatTextField></div>
+                            <div class="col-md-4 mb-3"> <MatTextField @bind-Value="@request.ReceiptHeader" Label="Receipt Header" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-4 mb-3"> <MatTextField @bind-Value="@request.ReceiptFooter" Label="Receipt Footer" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-4 mb-"> <MatDatePicker Format="MMMM dd, yyyy" FullWidth="true" @bind-Value="@request.BusinessStartDate" Label="Business Commencement Date" Required="true" ReadOnly="@isEnabled"></MatDatePicker></div>
+                            <div class="col-md-3 mb-3"> <MatTextField @bind-Value="@request.NumberOfTerminals" Label="No. of Terminals" Required="true" ReadOnly="@isEnabled" Type="Number"></MatTextField></div>
+                            <div class="col-md-auto mb-3">
+                                <div class="row">
+                                    <MatSelect Label="Business Segment" @bind-Value="@request.BusinessSegment" Disabled="true">
+                                        <MatOptionString></MatOptionString>
+                                        <MatOptionString Value="Store/Supermarket">Store/Supermarket</MatOptionString>
+                                        <MatOptionString Value="Hotel/GuestHouse">Hotel/GuestHouse</MatOptionString>
+                                        <MatOptionString Value="FuelStations">FuelStations</MatOptionString>
+                                        <MatOptionString Value="Church/NGO">Church/NGO</MatOptionString>
+                                        <MatOptionString Value="Restaurant">Restaurant</MatOptionString>
+                                        <MatOptionString Value="Wholesale">Wholesale</MatOptionString>
+                                        <MatOptionString Value="Logistics">Logistics</MatOptionString>
+                                        <MatOptionString Value="Telecoms">Telecoms</MatOptionString>
+                                        <MatOptionString Value="Others">Others</MatOptionString>
+                                    </MatSelect>
+
+                                    @if (request.BusinessSegment == "Others")
+                                    {
+                                        <MatTextField @bind-Value="@request.BusinessSegment" PlaceHolder="Specify" Required="true" ReadOnly="@isEnabled"></MatTextField>
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3"><MatTextField @bind-Value="@request.CorporateAddress" Label="Corporate/Head Office Address" FullWidth="true" Required="true" ReadOnly="@isEnabled" HelperText="if different from Terminal Location"></MatTextField></div>
+
+                        </div>
+
+                    </div>
+                </MatTab>
+
+                <MatTab Label="CONTACT INFORMATION">
+                    <div class="scroll" style="background-color:ghostwhite">
+                        <br />
+                        <div class="row">
+                            <div class="col-md-7 mb-3"> <MatTextField @bind-Value="@request.PrincipalContactName" Label="Principal Contact’s Name/Business Owner" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-5 mb-3"> <MatTextField @bind-Value="@request.PrincipalContactPosition" Label="Position" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3"> <MatTextField @bind-Value="@request.PrincipalContactAddress" Label="Address" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3"><MatTextField @bind-Value="@request.PrincipalContactStateOfOrigin" Label="State of Origin" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-4 mb-3"><MatTextField @bind-Value="@request.PrincipalContactEmail" Label="Email" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-4 mb-3"> <MatTextField @bind-Value="@request.PrincipalContactPhoneNo" Label="Tel/Mobile" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+                        <MatDivider></MatDivider>
+                        <div class="row">
+                            <div class="col-md-7 mb-3"><MatTextField @bind-Value="@request.ContactNameAtTerminalLocation" Label="Name of Contact at Terminal Location" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-5 mb-3"> <MatTextField @bind-Value="@request.ContactPositionAtTerminalLocation" Label="Position" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-9 mb-3"><MatTextField @bind-Value="@request.ContactAddressAtTerminalLocation" Label="Address" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                            <div class="col-md-3 mb-3"> <MatTextField @bind-Value="@request.ContactPhoneNoAtTerminalLocation" Label="Tel/Mobile" FullWidth="true" Required="true" ReadOnly="@isEnabled"></MatTextField></div>
+                        </div>
+                    </div>
+                </MatTab>
+
+                <MatTab Label="AGREEMENT">
+                    <br />
+                    <div class="scroll" style="height:auto; background-color:whitesmoke">
+                        <div style="transform: scale(1.60, 1.60)">
+                            <div style="position:relative;left:50%;margin-left:-297px;top:180px;width:595px;height:841px;border-style:outset;overflow:hidden">
+                                <div style="position:absolute;left:23.87px;top:9.43px" class="cls_002"><span class="cls_002">POINT OF SALE MERCHANT AGREEMENT</span></div>
+                                <div style="position:absolute;left:23.43px;top:47.54px" class="cls_012"><span class="cls_012">BETWEEN Wema Bank Plc (Acquirer)</span></div>
+                                <div style="position:absolute;left:226.57px;top:47.54px" class="cls_013"><span class="cls_013">against any damage to the POS Machine by the</span></div>
+                                <div style="position:absolute;left:415.60px;top:47.54px" class="cls_013"><span class="cls_013">restore the service within 72 hours of the</span></div>
+                                <div style="position:absolute;left:23.43px;top:57.48px" class="cls_012"><span class="cls_012">AND <strong>@request.MerchantName</strong> (Merchant) </span></div>
+                                <div style="position:absolute;left:226.57px;top:57.48px" class="cls_013"><span class="cls_013">negligence of its employees; any accidental loss</span></div>
+                                <div style="position:absolute;left:415.59px;top:57.48px" class="cls_013"><span class="cls_013">resolution of the cause of delay.</span></div>
+                                <div style="position:absolute;left:23.43px;top:67.42px" class="cls_012"><span class="cls_012"></span></div>
+                                <div style="position:absolute;left:226.57px;top:67.42px" class="cls_013"><span class="cls_013">of, or damage to, the POS Machine caused by its</span></div>
+                                <div style="position:absolute;left:226.57px;top:77.36px" class="cls_013"><span class="cls_013">agents or employees, any fraud detected or</span></div>
+                                <div style="position:absolute;left:401.47px;top:77.36px" class="cls_012"><span class="cls_012">g.</span></div>
+                                <div style="position:absolute;left:415.59px;top:77.36px" class="cls_012"><span class="cls_012">Notices</span></div>
+                                <div style="position:absolute;left:23.43px;top:87.30px" class="cls_013"><span class="cls_013">This Agreement dated ___________________ day of</span></div>
+                                <div style="position:absolute;left:226.57px;top:87.30px" class="cls_013"><span class="cls_013">reported whilst the POS is not at an agreed</span></div>
+                                <div style="position:absolute;left:415.59px;top:87.30px" class="cls_013"><span class="cls_013">Any notice affecting the rights and obligations of</span></div>
+                                <div style="position:absolute;left:23.43px;top:97.25px" class="cls_013"><span class="cls_013">____________________________</span></div>
+                                <div style="position:absolute;left:142.36px;top:97.25px" class="cls_013"><span class="cls_013">20____________</span></div>
+                                <div style="position:absolute;left:226.57px;top:97.25px" class="cls_013"><span class="cls_013">location, and all claims, expenses, or damages</span></div>
+                                <div style="position:absolute;left:415.59px;top:97.25px" class="cls_013"><span class="cls_013">the parties under this Agreement shall be given</span></div>
+                                <div style="position:absolute;left:23.42px;top:107.19px" class="cls_013"><span class="cls_013">between </span><span class="cls_012">Wema Bank Plc</span><span class="cls_013"> a Public Limited Liability</span></div>
+                                <div style="position:absolute;left:226.57px;top:107.19px" class="cls_013"><span class="cls_013">that result from the actions of its employees and</span></div>
+                                <div style="position:absolute;left:415.59px;top:107.19px" class="cls_013"><span class="cls_013">in writing and may be signed on behalf of the</span></div>
+                                <div style="position:absolute;left:23.42px;top:117.13px" class="cls_013"><span class="cls_013">Company having its registered address at 54, Marina</span></div>
+                                <div style="position:absolute;left:226.57px;top:117.13px" class="cls_013"><span class="cls_013">agents.</span></div>
+                                <div style="position:absolute;left:415.59px;top:117.13px" class="cls_013"><span class="cls_013">party or parties giving in writing and may be</span></div>
+                                <div style="position:absolute;left:23.42px;top:127.07px" class="cls_013"><span class="cls_013">Lagos, Nigeria </span><span class="cls_014">(hereinafter referred to as the Acquirer)</span></div>
+                                <div style="position:absolute;left:415.59px;top:127.07px" class="cls_013"><span class="cls_013">signed on behalf of the party or parties giving it</span></div>
+                                <div style="position:absolute;left:23.42px;top:137.01px" class="cls_013"><span class="cls_013">which expression shall where the context so admits,</span></div>
+                                <div style="position:absolute;left:212.45px;top:137.01px" class="cls_012"><span class="cls_012">d.</span></div>
+                                <div style="position:absolute;left:226.57px;top:137.01px" class="cls_012"><span class="cls_012">The Merchant</span><span class="cls_013"> shall:</span></div>
+                                <div style="position:absolute;left:415.59px;top:137.01px" class="cls_013"><span class="cls_013">and will, in addition to the ordinary modes of</span></div>
+                                <div style="position:absolute;left:23.42px;top:146.95px" class="cls_013"><span class="cls_013">include its assigns and successors in title and</span></div>
+                                <div style="position:absolute;left:212.45px;top:146.95px" class="cls_013"><span class="cls_013">I.</span></div>
+                                <div style="position:absolute;left:226.57px;top:146.95px" class="cls_013"><span class="cls_013">At all times observe the provisions of this</span></div>
+                                <div style="position:absolute;left:415.59px;top:146.95px" class="cls_013"><span class="cls_013">service, be deemed to be duly served if posted in</span></div>
+                                <div style="position:absolute;left:23.41px;top:156.90px" class="cls_013"><span class="cls_013">___________________________________________</span></div>
+                                <div style="position:absolute;left:226.56px;top:156.90px" class="cls_013"><span class="cls_013">Agreement.</span></div>
+                                <div style="position:absolute;left:415.58px;top:156.90px" class="cls_013"><span class="cls_013">a prepaid envelope addressed to the party to be</span></div>
+                                <div style="position:absolute;left:23.40px;top:166.84px" class="cls_013"><span class="cls_013">a limited liability company having its registered</span></div>
+                                <div style="position:absolute;left:212.44px;top:166.84px" class="cls_013"><span class="cls_013">ii.</span></div>
+                                <div style="position:absolute;left:226.56px;top:166.84px" class="cls_013"><span class="cls_013">honour all the Verve/Visa/Master Cards or any</span></div>
+                                <div style="position:absolute;left:415.58px;top:166.84px" class="cls_013"><span class="cls_013">served, in the case of the Merchant at the</span></div>
+                                <div style="position:absolute;left:23.39px;top:176.78px" class="cls_013"><span class="cls_013">business address at  __________________________</span></div>
+                                <div style="position:absolute;left:226.56px;top:176.78px" class="cls_013"><span class="cls_013">other approved card by the Acquirer presented</span></div>
+                                <div style="position:absolute;left:415.58px;top:176.78px" class="cls_013"><span class="cls_013">address above and in the case of the Acquirer at</span></div>
+                                <div style="position:absolute;left:23.39px;top:186.72px" class="cls_013"><span class="cls_013">___________________________________________</span></div>
+                                <div style="position:absolute;left:226.56px;top:186.72px" class="cls_013"><span class="cls_013">by the cardholder for the supply of goods and or</span></div>
+                                <div style="position:absolute;left:415.58px;top:186.72px" class="cls_013"><span class="cls_013">the address provided to the Merchant by the</span></div>
+                                <div style="position:absolute;left:23.39px;top:196.66px" class="cls_013"><span class="cls_013">Nigeria (hereinafter referred to as the Merchant)</span></div>
+                                <div style="position:absolute;left:226.56px;top:196.66px" class="cls_013"><span class="cls_013">services at the Merchant's agreed price(s);</span></div>
+                                <div style="position:absolute;left:415.57px;top:196.66px" class="cls_013"><span class="cls_013">Acquirer.</span></div>
+                                <div style="position:absolute;left:23.39px;top:206.60px" class="cls_013"><span class="cls_013">which expression shall where the context so admits</span></div>
+                                <div style="position:absolute;left:212.44px;top:206.60px" class="cls_013"><span class="cls_013">iii.</span></div>
+                                <div style="position:absolute;left:226.56px;top:206.60px" class="cls_013"><span class="cls_013">establish a fair policy for the exchange or return</span></div>
+                                <div style="position:absolute;left:23.39px;top:216.54px" class="cls_013"><span class="cls_013">include its assigns and successors in title.</span></div>
+                                <div style="position:absolute;left:226.56px;top:216.55px" class="cls_013"><span class="cls_013">of merchandise and give credit upon such</span></div>
+                                <div style="position:absolute;left:401.45px;top:216.55px" class="cls_012"><span class="cls_012">h.</span></div>
+                                <div style="position:absolute;left:415.57px;top:216.55px" class="cls_012"><span class="cls_012">Entire Agreement</span></div>
+                                <div style="position:absolute;left:226.55px;top:226.49px" class="cls_013"><span class="cls_013">return;</span></div>
+                                <div style="position:absolute;left:415.57px;top:226.49px" class="cls_013"><span class="cls_013">This Agreement constitutes the entire</span></div>
+                                <div style="position:absolute;left:23.39px;top:236.43px" class="cls_013"><span class="cls_013">The Acquirer and the Merchant are sometimes each</span></div>
+                                <div style="position:absolute;left:212.43px;top:236.43px" class="cls_013"><span class="cls_013">iv.</span></div>
+                                <div style="position:absolute;left:226.55px;top:236.43px" class="cls_013"><span class="cls_013">not make any warranties or representations</span></div>
+                                <div style="position:absolute;left:415.57px;top:236.43px" class="cls_013"><span class="cls_013">Agreement between the parties and shall be</span></div>
+                                <div style="position:absolute;left:23.39px;top:246.37px" class="cls_013"><span class="cls_013">referred to as a “Party” and together as the “Parties”.</span></div>
+                                <div style="position:absolute;left:226.55px;top:246.37px" class="cls_013"><span class="cls_013">whatsoever in relation to any goods or services</span></div>
+                                <div style="position:absolute;left:415.57px;top:246.37px" class="cls_013"><span class="cls_013">binding upon the parties, their executors,</span></div>
+                                <div style="position:absolute;left:226.55px;top:256.31px" class="cls_013"><span class="cls_013">supplied by the Merchant which may bind the</span></div>
+                                <div style="position:absolute;left:415.56px;top:256.31px" class="cls_013"><span class="cls_013">administrators, successors and assigns,</span></div>
+                                <div style="position:absolute;left:23.39px;top:266.25px" class="cls_012"><span class="cls_012">WHEREAS</span></div>
+                                <div style="position:absolute;left:226.54px;top:266.25px" class="cls_013"><span class="cls_013">Acquirer.</span></div>
+                                <div style="position:absolute;left:415.56px;top:266.25px" class="cls_013"><span class="cls_013">PROVIDED ALWAYS AND IT IS HEREBY AGREED</span></div>
+                                <div style="position:absolute;left: 212.43px;top: 316.19px" class="cls_013"><span class="cls_013">v.</span></div>
+                                <div style="position:absolute;left:226.54px;top:316.19px" class="cls_013"><span class="cls_013">exercise reasonable care in sales transactions to</span></div>
+                                <div style="position:absolute;left:415.56px;top:316.19px" class="cls_013"><span class="cls_013">that the Merchant may not assign this</span></div>
+                                <div style="position:absolute;left:23.39px;top:326.14px" class="cls_013"><span class="cls_013">1.</span></div>
+                                <div style="position:absolute;left:37.50px;top:326.14px" class="cls_013"><span class="cls_013">The Acquirer is a public limited liability company</span></div>
+                                <div style="position:absolute;left:226.54px;top:326.14px" class="cls_013"><span class="cls_013">detect forged or cloned cards;</span></div>
+                                <div style="position:absolute;left:415.55px;top:326.14px" class="cls_013"><span class="cls_013">Agreement without the prior written consent of</span></div>
+                                <div style="position:absolute;left:37.50px;top:336.08px" class="cls_013"><span class="cls_013">licensed under the laws of the Federal Republic</span></div>
+                                <div style="position:absolute;left:212.42px;top:336.08px" class="cls_013"><span class="cls_013">vi.</span></div>
+                                <div style="position:absolute;left:226.54px;top:336.08px" class="cls_013"><span class="cls_013">indemnify the Acquirer from and against all</span></div>
+                                <div style="position:absolute;left:415.55px;top:336.08px" class="cls_013"><span class="cls_013">the Acquirer. Where the Merchant consists of</span></div>
+                                <div style="position:absolute;left:37.50px;top:346.02px" class="cls_013"><span class="cls_013">of Nigeria to carry on banking business and</span></div>
+                                <div style="position:absolute;left:226.54px;top:346.02px" class="cls_013"><span class="cls_013">losses, expenses and damages which Inters</span></div>
+                                <div style="position:absolute;left:415.55px;top:346.02px" class="cls_013"><span class="cls_013">any two or more persons, their obligations</span></div>
+                                <div style="position:absolute;left:37.50px;top:355.96px" class="cls_013"><span class="cls_013">other business approved by the CBN Act, Cap</span></div>
+                                <div style="position:absolute;left:226.54px;top:355.96px" class="cls_013"><span class="cls_013">witch/Verve/Master Cardholders may suffer or</span></div>
+                                <div style="position:absolute;left:415.55px;top:355.96px" class="cls_013"><span class="cls_013">hereunder shall be joint and several.</span></div>
+                                <div style="position:absolute;left:37.50px;top:365.90px" class="cls_013"><span class="cls_013">C4, LFN 2004 and CBN Guidelines.</span></div>
+                                <div style="position:absolute;left:226.54px;top:365.90px" class="cls_013"><span class="cls_013">incur as a result of the failure of the Merchant to</span></div>
+                                <div style="position:absolute;left:226.54px;top:375.84px" class="cls_013"><span class="cls_013">observe any of its obligations hereunder or</span></div>
+                                <div style="position:absolute;left:401.43px;top:375.84px" class="cls_012"><span class="cls_012">I.</span></div>
+                                <div style="position:absolute;left:415.55px;top:375.84px" class="cls_012"><span class="cls_012">Variation of the Agreement</span></div>
+                                <div style="position:absolute;left:23.38px;top:385.79px" class="cls_013"><span class="cls_013">2.</span></div>
+                                <div style="position:absolute;left:37.50px;top:385.79px" class="cls_013"><span class="cls_013">The Merchant is a limited liability company</span></div>
+                                <div style="position:absolute;left:226.54px;top:385.79px" class="cls_013"><span class="cls_013">arising from any dispute between the Merchant</span></div>
+                                <div style="position:absolute;left:415.55px;top:385.79px" class="cls_013"><span class="cls_013">The Acquirer reserves the right to vary the terms</span></div>
+                                <div style="position:absolute;left:37.49px;top:395.73px" class="cls_013"><span class="cls_013">registered under the laws of the Federal</span></div>
+                                <div style="position:absolute;left:226.54px;top:395.73px" class="cls_013"><span class="cls_013">and any customer in respect of goods and</span></div>
+                                <div style="position:absolute;left:415.54px;top:395.73px" class="cls_013"><span class="cls_013">of this Agreement or other written instructions</span></div>
+                                <div style="position:absolute;left:37.49px;top:405.67px" class="cls_013"><span class="cls_013">Republic of Nigeria to carry on the business of</span></div>
+                                <div style="position:absolute;left:226.53px;top:405.67px" class="cls_013"><span class="cls_013">services.</span></div>
+                                <div style="position:absolute;left:415.54px;top:405.67px" class="cls_013"><span class="cls_013">which have been or may be issued by the</span></div>
+                                <div style="position:absolute;left:37.49px;top:415.61px" class="cls_013"><span class="cls_013">_________________________________________</span></div>
+                                <div style="position:absolute;left:415.54px;top:415.61px" class="cls_013"><span class="cls_013">Acquirer from time to time by way of a notice in</span></div>
+                                <div style="position:absolute;left:37.48px;top:425.55px" class="cls_013"><span class="cls_013">_________________________________________</span></div>
+                                <div style="position:absolute;left:212.41px;top:425.55px" class="cls_013"><span class="cls_013">g.</span></div>
+                                <div style="position:absolute;left:226.53px;top:425.55px" class="cls_013"><span class="cls_013">display prominently in its place or places of</span></div>
+                                <div style="position:absolute;left:415.54px;top:425.55px" class="cls_013"><span class="cls_013">writing. Any such variation will become effective</span></div>
+                                <div style="position:absolute;left:226.53px;top:435.49px" class="cls_013"><span class="cls_013">business the Inters witch/Verve/Master Card</span></div>
+                                <div style="position:absolute;left:415.54px;top:435.49px" class="cls_013"><span class="cls_013">7 days after receipt of such notification by the</span></div>
+                                <div style="position:absolute;left:23.36px;top:445.43px" class="cls_013"><span class="cls_013">3.</span></div>
+                                <div style="position:absolute;left:37.48px;top:445.43px" class="cls_013"><span class="cls_013">The Acquirer is a financial institution that</span></div>
+                                <div style="position:absolute;left:226.53px;top:445.43px" class="cls_013"><span class="cls_013">insignia supplied;</span></div>
+                                <div style="position:absolute;left:415.54px;top:445.43px" class="cls_013"><span class="cls_013">Merchant.</span></div>
+                                <div style="position:absolute;left:37.47px;top:455.38px" class="cls_013"><span class="cls_013">accepts card payments for products or services</span></div>
+                                <div style="position:absolute;left:212.41px;top:455.38px" class="cls_013"><span class="cls_013">h.</span></div>
+                                <div style="position:absolute;left:226.53px;top:455.38px" class="cls_013"><span class="cls_013">retain copies of sales receipt for a minimum of</span></div>
+                                <div style="position:absolute;left:37.47px;top:465.32px" class="cls_013"><span class="cls_013">on behalf of the Merchant.</span></div>
+                                <div style="position:absolute;left:226.53px;top:465.32px" class="cls_013"><span class="cls_013">one year from the date of issuance and make</span></div>
+                                <div style="position:absolute;left:401.42px;top:465.32px" class="cls_012"><span class="cls_012">J.</span></div>
+                                <div style="position:absolute;left:415.54px;top:465.32px" class="cls_012"><span class="cls_012">Governing Law</span></div>
+                                <div style="position:absolute;left:226.53px;top:475.26px" class="cls_013"><span class="cls_013">them available to the Acquirer upon demand.</span></div>
+                                <div style="position:absolute;left:415.54px;top:475.26px" class="cls_013"><span class="cls_013">This Agreement shall be governed by and</span></div>
+                                <div style="position:absolute;left:23.35px;top:485.20px" class="cls_013"><span class="cls_013">4.</span></div>
+                                <div style="position:absolute;left:37.47px;top:485.20px" class="cls_013"><span class="cls_013">The Merchant has requested the deployment of</span></div>
+                                <div style="position:absolute;left:212.41px;top:485.20px" class="cls_013"><span class="cls_013">I.</span></div>
+                                <div style="position:absolute;left:226.53px;top:485.20px" class="cls_013"><span class="cls_013">ensure that it uses the POS in the agreed</span></div>
+                                <div style="position:absolute;left:415.53px;top:485.20px" class="cls_013"><span class="cls_013">construed in accordance with the laws of the</span></div>
+                                <div style="position:absolute;left:37.47px;top:495.14px" class="cls_013"><span class="cls_013">a Point of Sales (POS) terminal by the Acquirer as</span></div>
+                                <div style="position:absolute;left:226.52px;top:495.14px" class="cls_013"><span class="cls_013">manner and shall secure the POS at all times;</span></div>
+                                <div style="position:absolute;left:415.53px;top:495.14px" class="cls_013"><span class="cls_013">Federal Republic of Nigeria.</span></div>
+                                <div style="position:absolute;left:37.47px;top:505.08px" class="cls_013"><span class="cls_013">a channel for accepting and processing card</span></div>
+                                <div style="position:absolute;left:212.40px;top:505.08px" class="cls_013"><span class="cls_013">j.</span></div>
+                                <div style="position:absolute;left:226.52px;top:505.08px" class="cls_013"><span class="cls_013">ensure that the POS is active at all times and</span></div>
+                                <div style="position:absolute;left:37.47px;top:515.03px" class="cls_013"><span class="cls_013">payments.</span></div>
+                                <div style="position:absolute;left:226.52px;top:515.03px" class="cls_013"><span class="cls_013">made available for customer's use;</span></div>
+                                <div style="position:absolute;left:415.53px;top:515.03px" class="cls_012"><span class="cls_012">IN WITNESS WHEREOF </span><span class="cls_013">the parties to this</span></div>
+                                <div style="position:absolute;left:212.39px;top:524.97px" class="cls_013"><span class="cls_013">k.</span></div>
+                                <div style="position:absolute;left:226.51px;top:524.97px" class="cls_013"><span class="cls_013">ensure that it contacts the Acquirer immediately</span></div>
+                                <div style="position:absolute;left:415.53px;top:524.97px" class="cls_013"><span class="cls_013">Agreement have caused their respective</span></div>
+                                <div style="position:absolute;left:37.47px;top:534.91px" class="cls_012"><span class="cls_012">NOW THEREFORE</span><span class="cls_013">, in consideration of the</span></div>
+                                <div style="position:absolute;left:226.51px;top:534.91px" class="cls_013"><span class="cls_013">it detects any fault or malfunctioning of the POS.</span></div>
+                                <div style="position:absolute;left:415.52px;top:534.91px" class="cls_013"><span class="cls_013">common seals to be hereunto affixed the date</span></div>
+                                <div style="position:absolute;left:37.46px;top:544.85px" class="cls_013"><span class="cls_013">above, the Parties have agreed to the terms and</span></div>
+                                <div style="position:absolute;left:415.52px;top:544.85px" class="cls_013"><span class="cls_013">first above written.</span></div>
+                                <div style="position:absolute;left:37.46px;top:554.79px" class="cls_013"><span class="cls_013">conditions provided in this Agreement.</span></div>
+                                <div style="position:absolute;left:212.39px;top:554.79px" class="cls_012"><span class="cls_012">e.</span></div>
+                                <div style="position:absolute;left:226.51px;top:554.79px" class="cls_012"><span class="cls_012">Acquirer Obligations</span></div>
+                                <div style="position:absolute;left:226.51px;top:564.73px" class="cls_013"><span class="cls_013">The Acquirer shall:</span></div>
+                                <div style="position:absolute;left:415.52px;top:564.73px" class="cls_012"><span class="cls_012">THE COMMON SEAL</span><span class="cls_013"> of the within named</span></div>
+                                <div style="position:absolute;left:23.34px;top:574.68px" class="cls_012"><span class="cls_012">a.</span></div>
+                                <div style="position:absolute;left:37.46px;top:574.68px" class="cls_012"><span class="cls_012">Effective Date and Duration</span></div>
+                                <div style="position:absolute;left:212.39px;top:574.68px" class="cls_013"><span class="cls_013">I.</span></div>
+                                <div style="position:absolute;left:226.51px;top:574.68px" class="cls_013"><span class="cls_013">Supply the Merchant with thermal roll paper</span></div>
+                                <div style="position:absolute;left:37.46px;top:584.62px" class="cls_013"><span class="cls_013">This Agreement shall commence on the date of</span></div>
+                                <div style="position:absolute;left:226.51px;top:584.62px" class="cls_013"><span class="cls_013">and other POS accessories.</span></div>
+                                <div style="position:absolute;left:415.52px;top:584.62px" class="cls_013"><span class="cls_013">___________________________________________</span></div>
+                                <div style="position:absolute;left:37.46px;top:594.56px" class="cls_013"><span class="cls_013">its execution (the Effective date) and shall</span></div>
+                                <div style="position:absolute;left:212.39px;top:594.56px" class="cls_013"><span class="cls_013">ii.</span></div>
+                                <div style="position:absolute;left:226.51px;top:594.56px" class="cls_013"><span class="cls_013">Supply the Merchant with POS terminals upon</span></div>
+                                <div style="position:absolute;left:415.52px;top:594.56px" class="cls_013"><span class="cls_013">was hereunto affixed</span></div>
+                                <div style="position:absolute;left:37.45px;top:604.50px" class="cls_013"><span class="cls_013">thereafter be automatically renewed subject to</span></div>
+                                <div style="position:absolute;left:226.51px;top:604.50px" class="cls_013"><span class="cls_013">the execution of the POS Agreement between</span></div>
+                                <div style="position:absolute;left:37.45px;top:614.44px" class="cls_013"><span class="cls_013">mutual agreement of parties unless it is earlier</span></div>
+                                <div style="position:absolute;left:226.50px;top:614.44px" class="cls_013"><span class="cls_013">the Merchant and Acquirer.</span></div>
+                                <div style="position:absolute;left:415.52px;top:614.44px" class="cls_013"><span class="cls_013">In the presence of</span></div>
+                                <div style="position:absolute;left:37.45px;top:624.38px" class="cls_013"><span class="cls_013">terminated by either party giving a 30 days'</span></div>
+                                <div style="position:absolute;left:212.38px;top:624.38px" class="cls_013"><span class="cls_013">iii.</span></div>
+                                <div style="position:absolute;left:226.50px;top:624.38px" class="cls_013"><span class="cls_013">Ensure that it responds to calls from the</span></div>
+                                <div style="position:absolute;left:37.45px;top:634.32px" class="cls_013"><span class="cls_013">written notice of intention to terminate to the</span></div>
+                                <div style="position:absolute;left:226.50px;top:634.32px" class="cls_013"><span class="cls_013">Merchant on malfunctioning or faulty terminals</span></div>
+                                <div style="position:absolute;left:415.52px;top:634.32px" class="cls_013"><span class="cls_013">________________________________________________</span></div>
+                                <div style="position:absolute;left:37.45px;top:644.27px" class="cls_013"><span class="cls_013">other party.</span></div>
+                                <div style="position:absolute;left:226.50px;top:644.27px" class="cls_013"><span class="cls_013">within 48 hours (Lagos Metropolis) and 72 hours</span></div>
+                                <div style="position:absolute;left:415.52px;top:644.27px" class="cls_013"><span class="cls_013">DIRECTOR</span></div>
+                                <div style="position:absolute;left:226.50px;top:654.21px" class="cls_013"><span class="cls_013">outside Lagos of receiving the call.</span></div>
+                                <div style="position:absolute;left:23.33px;top:664.15px" class="cls_012"><span class="cls_012">b.</span></div>
+                                <div style="position:absolute;left:37.45px;top:664.15px" class="cls_012"><span class="cls_012">Service Location</span></div>
+                                <div style="position:absolute;left:415.52px;top:664.15px" class="cls_013"><span class="cls_013">________________________________________________</span></div>
+                                <div style="position:absolute;left:23.33px;top:674.09px" class="cls_013"><span class="cls_013">I.</span></div>
+                                <div style="position:absolute;left:37.45px;top:674.09px" class="cls_013"><span class="cls_013">The POS shall be deployed at ________________</span></div>
+                                <div style="position:absolute;left:212.38px;top:674.09px" class="cls_012"><span class="cls_012">f.</span></div>
+                                <div style="position:absolute;left:226.50px;top:674.09px" class="cls_012"><span class="cls_012">Force Majeure</span></div>
+                                <div style="position:absolute;left:415.52px;top:674.09px" class="cls_013"><span class="cls_013">SECRETARY</span></div>
+                                <div style="position:absolute;left:38.58px;top:684.03px" class="cls_013"><span class="cls_013">________________________________________</span></div>
+                                <div style="position:absolute;left:37.44px;top:693.97px" class="cls_013"><span class="cls_013">________________________________________</span></div>
+                                <div style="position:absolute;left:226.50px;top:693.97px" class="cls_013"><span class="cls_013">The Acquirer is hereby excluded from all liability</span></div>
+                                <div style="position:absolute;left:415.52px;top:693.97px" class="cls_012"><span class="cls_012">THE COMMON SEAL</span><span class="cls_013"> of the within named</span></div>
+                                <div style="position:absolute;left:37.44px;top:703.92px" class="cls_013"><span class="cls_013">and shall not at any time be put to use at any</span></div>
+                                <div style="position:absolute;left:226.49px;top:703.92px" class="cls_013"><span class="cls_013">under this Agreement if it is prevented from</span></div>
+                                <div style="position:absolute;left:37.44px;top:713.86px" class="cls_013"><span class="cls_013">other location except for locations that the</span></div>
+                                <div style="position:absolute;left:226.49px;top:713.86px" class="cls_013"><span class="cls_013">carrying out its obligations under this</span></div>
+                                <div style="position:absolute;left:415.52px;top:713.86px" class="cls_013"><span class="cls_013">________________________________________________</span></div>
+                                <div style="position:absolute;left:37.44px;top:723.80px" class="cls_013"><span class="cls_013">Acquirer consents to. Such consent shall be</span></div>
+                                <div style="position:absolute;left:226.49px;top:723.80px" class="cls_013"><span class="cls_013">Agreement by reason of force Majeure or as a</span></div>
+                                <div style="position:absolute;left:415.52px;top:723.80px" class="cls_013"><span class="cls_013">was hereunto affixed</span></div>
+                                <div style="position:absolute;left:37.44px;top:733.74px" class="cls_013"><span class="cls_013">applied for and granted in writing.</span></div>
+                                <div style="position:absolute;left:226.49px;top:733.74px" class="cls_013"><span class="cls_013">result of an event or circumstances beyond its</span></div>
+                                <div style="position:absolute;left:226.48px;top:743.68px" class="cls_013"><span class="cls_013">control such as circumstances where the POS</span></div>
+                                <div style="position:absolute;left:415.52px;top:743.68px" class="cls_013"><span class="cls_013">In the presence of</span></div>
+                                <div style="position:absolute;left:23.32px;top:753.62px" class="cls_013"><span class="cls_013">ii.</span></div>
+                                <div style="position:absolute;left:37.44px;top:753.62px" class="cls_013"><span class="cls_013">The Merchant warrants that it shall not change</span></div>
+                                <div style="position:absolute;left:226.48px;top:753.62px" class="cls_013"><span class="cls_013">terminal or the communication links fail.</span></div>
+                                <div style="position:absolute;left:37.43px;top:763.56px" class="cls_013"><span class="cls_013">the location of the POS at any time without the</span></div>
+                                <div style="position:absolute;left:415.52px;top:763.57px" class="cls_013"><span class="cls_013">________________________________________________</span></div>
+                                <div style="position:absolute;left:37.43px;top:773.51px" class="cls_013"><span class="cls_013">written consent of the Acquirer.</span></div>
+                                <div style="position:absolute;left:226.48px;top:773.51px" class="cls_013"><span class="cls_013">Where the inability to provide the service is</span></div>
+                                <div style="position:absolute;left:415.52px;top:773.51px" class="cls_013"><span class="cls_013">DIRECTOR</span></div>
+                                <div style="position:absolute;left:226.48px;top:783.45px" class="cls_013"><span class="cls_013">within the Acquirer's knowledge, it shall notify</span></div>
+                                <div style="position:absolute;left:23.31px;top:786.93px" class="cls_012"><span class="cls_012">c.</span></div>
+                                <div style="position:absolute;left:37.43px;top:786.93px" class="cls_012"><span class="cls_012">Indemnity</span></div>
+                                <div style="position:absolute;left:226.48px;top:793.39px" class="cls_013"><span class="cls_013">the Merchant of such inability immediately it</span></div>
+                                <div style="position:absolute;left:415.52px;top:793.39px" class="cls_013"><span class="cls_013">________________________________________________</span></div>
+                                <div style="position:absolute;left:37.43px;top:796.87px" class="cls_013"><span class="cls_013">The Merchant hereby undertakes that it would</span></div>
+                                <div style="position:absolute;left:226.48px;top:803.33px" class="cls_013"><span class="cls_013">discovers it and shall make concerted efforts to</span></div>
+                                <div style="position:absolute;left:415.52px;top:803.33px" class="cls_013"><span class="cls_013">SECRETARY</span></div>
+                                <div style="position:absolute;left:37.43px;top:806.82px" class="cls_013"><span class="cls_013">indemnify the Acquirer and keep it indemnified</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <MatCheckbox @bind-Value="request.Agreement" Label="I Agree." Disabled="true">
+                    </MatCheckbox>
+                </MatTab>
+
+                <MatTab Label="DECLARATION">
+                    <div class="scroll" style="background-color:whitesmoke">
+                        <div>
+                            <MatCheckbox @bind-Value="request.Declaration" Disabled="true">
+                                <br />
+                                <br />
+                                I, @request.PrincipalContactName on behalf of @request.MerchantName authorize the verification of the information provided on this form and hereby certify that the information provided in this form is true and accurate. I agree that Wema Bank Plc reserves the right to take legal action against me if the information here is false.
+                            </MatCheckbox>
+                        </div>
+                        <br />
+                        <br />
+                        @if (string.IsNullOrEmpty(msg))
+                        {
+                            <div class="row">
+                                <div class="col-md-3 mb-3"></div>
+                                <div class="col-md-6 mb-3"> <MatTextField @bind-Value="@request.Comments" Label="Remarks" FullWidth="true" Required="true" ReadOnly="false"></MatTextField></div>
+                                <div class="col-md-3 mb-3"></div>
+                            </div>
+
+                            <br />
+                            <br />
+                            <div class="row">
+                                <div class="col-md-3 mb-3"></div>
+                                <div class="col-md-3 mb-2" style="text-align:right"><MatButton Raised="true" OnClick="@AcceptButton">Accept</MatButton></div>
+                                <div class="col-md-3 mb-2" style="text-align:left"><MatButton Raised="true" OnClick="@DeclineButton">Decline</MatButton></div>
+                                <div class="col-md-3 mb-2" style="text-align:left"><MatButton Outlined="true">Back</MatButton></div>
+                                <div class="col-md-3 mb-3"></div>
+                            </div>
+                        }
+                        else
+                        {
+                            <br />
+                            <br />
+                            <div class="row">
+                                <div class="col-md-3 mb-3"></div>
+                                <div class="col-md-3 mb-3" style="text-align:right"><MatButton Raised="true" OnClick="@UpdateButton">Submit</MatButton></div>
+                                <div class="col-md-3 mb-3" style="text-align:left"><MatButton Outlined="true">Cancel</MatButton></div>
+                                <div class="col-md-3 mb-3"></div>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3"></div>
+                            <div class="col-md-9 mb-3" style="color:red;"> @ValidationMsg <ValidationSummary /> </div>
+                            <ValidationSummary />
+                        </div>
+                    </div>
+                </MatTab>
+            </MatTabGroup>
+        </EditForm>
+    </div>
+
+    <div class="col-md-1 mb-3">
+    </div>
+</div>
+
+@code {
+
+    POSRequest request = new POSRequest();
+    DateTime dd = DateTime.Now;
+    bool isEnabled;
+
+    public string ValidationMsg = "";
+    public bool IsPhoneEmailValid = false;
+
+    [Parameter]
+    public string id { get; set; }
+
+    [Parameter]
+    public string msg { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(msg))
+            {
+                isEnabled = true;
+            }
+            else
+            {
+                isEnabled = false;
+            }
+
+            if (!string.IsNullOrEmpty(id))
+            {
+                request = await service.GetById(id);
+                request.Comments = string.Empty;
+            }
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+
+    void AcceptButton()
+    {
+        request.Status = EStatus.Reviewed;
+        request.Comments = request.Status.ToDescriptionString();
+        OkClick();
+    }
+
+    void DeclineButton()
+    {
+        if (string.IsNullOrEmpty(request.Comments))
+        {
+            ValidationMsg = "Please provide reason for declining in the Remarks Field.";
+        }
+        else
+        {
+            request.Status = EStatus.Declined;
+            OkClick();
+        }
+    }
+
+    void UpdateButton()
+    {
+        request.Status = EStatus.Submitted;
+        request.Comments = request.Status.ToDescriptionString();
+        OkClick();
+    }
+
+    async void OkClick()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(msg))
+            {
+                await service.SubmitAsync(request.RequestId, request.Status, request.Comments);
+                navigationManager.NavigateTo($"/RequestStatus/Sol");
+            }
+            else
+            {
+                await service.UpdateAsync(request);
+                navigationManager.NavigateTo($"/Customer/{request.AccountNumber}");
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+}

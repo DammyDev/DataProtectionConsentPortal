@@ -1,0 +1,369 @@
+﻿@page "/"
+@page "/{msg}"
+
+@using POSPortal.Data
+@using Newtonsoft.Json
+@using Blazor.FileReader
+@using System.IO
+@using Serilog;
+@using System.Security.Claims
+@using Microsoft.Extensions.Configuration
+
+@inject POSService service
+@inject IFileReaderService fileReaderService;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IConfiguration _config
+@inject IJSRuntime jsRuntime
+
+<AuthorizeView>
+    <Authorized>
+        <div>
+            @if (showDivOne == true)
+            {
+                <div id="DivOne">
+
+                    <EditForm Model="@payLoad" OnValidSubmit="@Check" Context="DivOne">
+
+                        <div class="row" style="margin-bottom:15px">
+                            <div class="col-md-7 mb-3">
+                                Please enter customer's account number here:
+                                <input type="text" class="form-control-sm" @bind="payLoad.AccountNumber" required />
+
+                                <button class="btn-sm btn-outline-primary" type="submit">Check </button>
+                            </div>
+
+                            <div class="col-md-5 mb-3">
+                                @if (showError == true)
+                                {
+                                    <span id="error" style="color:red; font-stretch:narrower"> <em>@errorMsg</em></span>
+                                }
+                            </div>
+                        </div>
+
+
+                    </EditForm>
+
+                </div>
+            }
+
+            @if (showDivTwo == true)
+            {
+                <div id="DivTwo">
+                    <h5>
+                        <br />
+                        Account Number: <strong>@payLoad.AccountNumber</strong>
+                    </h5>
+                </div>
+            }
+
+            @if (showProgress == true)
+            {
+                <div>
+                    <MatProgressBar Indeterminate="true"></MatProgressBar>
+                </div>
+            }
+
+            @if (showGreen == true)
+            {
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <h5 class="card-header">@fResponse.acctName | @fResponse.cif_id | @payLoad.AccountNumber</h5>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="card-body">
+                        <h6 class="alert-heading">Well done!</h6>
+                        <p>We received this customer's consent successfully on @consent.DateCreated</p>
+                        <hr>
+                        <p class="mb-0">Thank you.</p>
+                    </div>
+                </div>
+            }
+            else if (showRed == true)
+            {
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <h5 class="card-header">@fResponse.acctName | @fResponse.cif_id | @payLoad.AccountNumber</h5>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    
+                    <div class="card-body">
+                        <h6 class="alert-heading">Oops! No consent yet!</h6>
+                        <p>Kindly encourage the customer to give consent by filling this <a target="_blank" class="font-weight-bold" href="~/consentform.pdf">consent form</a> correctly and completely. </p>
+                        <p>You are required to verify the customer's signature on the form and upload a legibly scanned PDF copy.</p>
+                        <hr>
+                        <EditForm Model="@uploadModel" OnValidSubmit="@ReadFile" Context="DivTwo">
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1" @bind="uploadModel.IsConsentReceived" required>
+                                        <label class="form-check-label" for="inlineCheckbox1">The customer has signed and given consent</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2" @bind="uploadModel.IsSignatureVerified" required>
+                                        <label class="form-check-label" for="inlineCheckbox2"> I have verified the signature.</label>
+                                    </div>
+                                </div>
+                                <div class="input-group-append">
+
+                                    @if (showError == true)
+                                    {
+                                        <span id="error" style="color:red; font-stretch:narrower; padding-right:5px"> <em>@errorMsg</em></span>
+                                    }
+                                    <input type="file" @ref=inputTypeFileElement required />
+                                    <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
+
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <br />
+        <br />
+
+        <div class="row" style="text-align:center;">
+
+            <div class="col-md-4 mb-3">
+
+            </div>
+
+            <div class="col-md-4 mb-3" style="display:inline-block">
+
+                <div>
+                    <p>
+                        <MatTextField @bind-Value="@_username" Label="Username" FullWidth="true" Required="true"></MatTextField>
+                    </p>
+
+                    <p>
+                        <MatTextField @bind-Value="@_password" Label="Password" Icon="lock_outline" IconTrailing="true" FullWidth="true" Required="true" Type="password"></MatTextField>
+                    </p>
+
+                    <button class="btn-sm btn-outline-primary" style="width:100%;" @onclick="PerformLogin">L O G I N</button>
+                    <p class="text-danger"><em>@msg</em></p>
+
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+            </div>
+        </div>
+
+    </NotAuthorized>
+    <Authorizing> Kindly wait while we sign you in..</Authorizing>
+</AuthorizeView>
+
+@code {
+    ElementReference inputTypeFileElement;
+    HttpClient Http = new HttpClient();
+    HttpResponseMessage responseMsg = new HttpResponseMessage();
+    FinacleResponse fResponse = new FinacleResponse();
+    Request payLoad = new Request();
+    Consent consent = new Consent();
+    UploadModel uploadModel = new UploadModel();
+
+    private string _username;
+    private string _password;
+    bool showGreen = false;
+    bool showRed = false;
+    bool showDivOne = true;
+    bool showDivTwo = false;
+    bool showError = true;
+    bool showProgress => !showError;
+    string errorMsg;
+
+    AuthenticationState authState;
+    ClaimsPrincipal user;
+
+    [Parameter]
+    public string msg { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+
+        if (msg == "Unauthorized")
+        {
+            msg = "Oops! Authentication failed.";
+        }
+        else if (msg == "blank")
+        {
+            msg = " Username and Password are required";
+        }
+        else
+        {
+            msg = "";
+        }
+    }
+
+    async void Check()
+    {
+        errorMsg = "";
+        showError = false;
+        uploadModel.IsSignatureVerified = false;
+        uploadModel.IsConsentReceived = false;
+
+        try
+        {
+            if (payLoad.AccountNumber != null)
+            {
+                var requestUri = $"{_config.GetValue<string>("Settings:BaseUrl")}?acctnum={payLoad.AccountNumber}&appID={_config.GetValue<string>("Settings:AppId")}";
+
+                responseMsg = await Http.GetAsync(requestUri);
+                Log.Information($"{user.Identity.Name} |FI_Service called {requestUri}");
+            }
+
+            if (responseMsg.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+
+                showDivOne = showRed = showGreen = false;
+                showDivTwo = showError = true;
+
+                var responseContent = await responseMsg.Content.ReadAsStringAsync();
+                fResponse = JsonConvert.DeserializeObject<FinacleResponse>(responseContent);
+
+                if (fResponse != null)
+                {
+                    Log.Information($"{DateTime.Now} | FI_Service Response:{responseMsg.StatusCode.ToString()} Content: {payLoad.AccountNumber} {fResponse.cif_id} '{fResponse.acctName}'");
+                    consent = await service.GetCif(fResponse.cif_id);
+
+                    if (consent == null)
+                    {
+                        showRed = true;
+                        Log.Information($"{DateTime.Now} | Database Response: {fResponse.cif_id} not found. ");
+
+                    }
+                    else
+                    {
+                        showGreen = true;
+                        Log.Information($"{DateTime.Now} | Database Response: {fResponse.cif_id} found.  ");
+                    }
+                }
+                else
+                {
+
+                }
+
+            }
+            else if (responseMsg.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                showError = true;
+                errorMsg = "Not Found on Finacle! Please retry with a valid Account Number.";
+                Log.Information($"{user.Identity.Name} | {payLoad.AccountNumber} {errorMsg}");
+            }
+            else
+            {
+                showError = true;
+                errorMsg = $"Response error from Finacle! Error: {responseMsg.StatusCode}";
+                Log.Error($"{user.Identity.Name} | {errorMsg}");
+            }
+        }
+        catch (Exception ex)
+        {
+            showError = true;
+            errorMsg = $"{ex.Message}";
+            Log.Error($"{user.Identity.Name} | {ex.Message}");
+        }
+        finally
+        {
+            this.StateHasChanged();
+        }
+
+    }
+
+    void Close()
+    {
+        try
+        {
+            showDivTwo = showRed = showGreen = false;
+            showDivOne = showError = true;
+            payLoad.AccountNumber = null;
+            consent = null;
+            errorMsg = string.Empty;
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+
+            Log.Error($"{user.Identity.Name} | {ex.Message}");
+        }
+
+    }
+
+    public async Task ReadFile()
+    {
+        if (uploadModel.IsConsentReceived == false || uploadModel.IsSignatureVerified == false)
+        {
+            showError = true;
+            errorMsg = "Please check the two boxes";
+            return;
+        }
+        else
+        {
+            showError = false;
+        }
+
+        foreach (var file in await fileReaderService.CreateReference(inputTypeFileElement).EnumerateFilesAsync())
+        {
+            IFileInfo fileInfo = await file.ReadFileInfoAsync();
+
+            var ext = fileInfo.Name.EndsWith("pdf") ? "pdf" : 
+                      fileInfo.Name.EndsWith("jpg") ? "jpg" : 
+                      fileInfo.Name.EndsWith("jpeg") ? "jpeg": 
+                      fileInfo.Name.EndsWith("png") ? "png" : "none";
+
+            try
+            {
+                if (ext != "none")
+                {
+                    if (fileInfo.Size <= 1240000)
+                    {
+                        using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync(4096))
+                        {
+                            showError = false;
+                            await service.UploadAsync(memoryStream, fResponse, ext);
+                        }
+
+                        Check();
+                    }
+                    else
+                    {
+                        showError = true;
+                        errorMsg = "File size must be 1MB or less...";
+                    }
+                }
+                else
+                {
+                    showError = true;
+                    errorMsg = "File must be a PDF, JPG, or PNG";
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"{user.Identity.Name} | {ex.Message}");
+            }
+
+        }
+    }
+
+    public async Task PerformLogin()
+    {
+        Console.WriteLine("Login here");
+
+        // TODO get and verify username and password here against database
+
+        var interop = new Interop(jsRuntime);
+        string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
+
+        // Here I provide fields matching the arguments of my login method, in LoginRequester.cshtml.cs
+        var fields = new { __RequestVerificationToken = antiforgerytoken, username = _username, password = _password };
+
+        // Here I make a call to the loginRequester.cshtml.cs, the post method, with fields as argument.
+        // it happens through the Interop.cs class
+        await interop.SubmitForm("/loginRequester/", fields);
+    }
+}

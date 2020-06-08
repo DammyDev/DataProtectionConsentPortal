@@ -1,0 +1,25 @@
+﻿@inject IJSRuntime jsRuntime
+
+<AuthorizeView>
+    <Authorized>
+        <span style="color:antiquewhite"> @context.User.Identity.Name</span>
+        <button @onclick="Logout" class="nav-link btn btn-link">Log out</button>
+    </Authorized>
+    <NotAuthorized>
+        @*<a href="register">Register</a>*@
+        @*<a href="login">Login</a>*@
+        
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    public async Task Logout() {
+
+        Console.WriteLine("Logout here");
+        var interop = new Interop(jsRuntime);
+        string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
+        
+        var fields = new {__RequestVerificationToken = antiforgerytoken};
+        await interop.SubmitForm("/logoutRequester/", fields);
+    }
+}
